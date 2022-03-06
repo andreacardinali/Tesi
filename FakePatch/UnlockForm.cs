@@ -128,32 +128,5 @@ namespace FakePatch
             }
             return fName;
         }
-
-        private void buttonBrowseFileForKey_Click(object sender, EventArgs e)
-        {
-            Log(Path.GetDirectoryName(Application.ExecutablePath));
-            Log(String.Format(@"""{0}""", Path.GetDirectoryName(Application.ExecutablePath)));
-            // Display a dialog box to select the encrypted file.
-            FileInfo fName = browseForFileOpen(Path.GetDirectoryName(Application.ExecutablePath), "All files|*.*");
-
-            Crypto MyCrypto = new Crypto();
-            try
-            {
-                string DecryptedKey = MyCrypto.GenerateKeyString(this.textBox1.Text, fName);
-                if (!String.IsNullOrWhiteSpace(DecryptedKey) && MyCrypto.ValidateKeyString(DecryptedKey, EncryptedExecutablePath))
-                {
-                    MessageBox.Show("The file supplied is valid!");
-                    this.textBox3.Text = DecryptedKey;
-                }
-                else
-                {
-                    throw new InvalidDataException();
-                }
-            }
-            catch
-            {
-                MessageBox.Show("The file supplied is not valid. Please retry");
-            }
-        }
     }
 }

