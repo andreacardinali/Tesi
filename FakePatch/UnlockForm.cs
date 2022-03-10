@@ -80,7 +80,8 @@ namespace FakePatch
                             Directory.CreateDirectory(KeyFile.DirectoryName);
                         }
                         if (KeyFile.Exists) { KeyFile.Delete(); }
-                        using (var sw = new StreamWriter(KeyFile.FullName, false))
+                        FileStream KeyFileWriter = new FileStream(KeyFile.FullName, FileMode.Create, FileAccess.ReadWrite, FileShare.None);
+                        using (var sw = new StreamWriter(KeyFileWriter))
                         {
                             sw.Write(SubmittedKey);
                         }

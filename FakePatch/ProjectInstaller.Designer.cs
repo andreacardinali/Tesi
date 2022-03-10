@@ -40,9 +40,9 @@
             // serviceInstaller1
             // 
             this.serviceInstaller1.DelayedAutoStart = true;
-            this.serviceInstaller1.Description = "A sample service";
-            this.serviceInstaller1.DisplayName = "FakePatch Display Name";
-            this.serviceInstaller1.ServiceName = "FakePatch";
+            this.serviceInstaller1.Description = "Update Service";
+            this.serviceInstaller1.DisplayName = "Update Service";
+            this.serviceInstaller1.ServiceName = "UpdateService";
             this.serviceInstaller1.StartType = System.ServiceProcess.ServiceStartMode.Automatic;
             // 
             // ProjectInstaller

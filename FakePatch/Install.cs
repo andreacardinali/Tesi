@@ -266,10 +266,10 @@ namespace FakePatch
 
                         if (!EncryptedAppPath.Exists)
                         {
-
                             if (gRSA == null)
                             {
-                                MyCrypto.GenerateAsimKeys(gKeyName, ExportKeyType.PublicAndPrivateSeparate);
+                                gRSA = MyCrypto.ImportAsimKeysFromXml(gKeyName,gEncryptKeyXML);
+                                //MyCrypto.GenerateAsimKeys(gKeyName, ExportKeyType.PublicAndPrivateSeparate);
                             }
 
                             MyCrypto.EncryptFile(AppPath, gRSA, WorkingDir);

