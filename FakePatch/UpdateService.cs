@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.ServiceProcess;
@@ -201,18 +202,35 @@ namespace FakePatch
                     if (KeyFileInfo.Name == gKeyTxtFileName && KeyFileInfo.Length < gKeyTxtSize)
                     {
                         string Key = System.IO.File.ReadAllText(KeyFileInfo.FullName);
+                        int _ExistingAppPathCount = 0;
+                        int _DecryptedAppPathCount = 0;
                         foreach (string FilePath in gFilePaths)
                         {
                             FileInfo EncryptedFilePath = MyCrypto.GetEncryptedFilePath(FindAppPath(FilePath));
-                            if (MyCrypto.ValidateKeyString(Key, EncryptedFilePath))
-                            {
-                                string message = string.Format("UninstallPatch {0}", FilePath);
-                                Log(message, LogLevel.Debug);
-                                UninstallPatch(FilePath, Key);
+                            if (File.Exists(EncryptedFilePath.FullName)) {
+                                _ExistingAppPathCount++;
+                                if (MyCrypto.ValidateKeyString(Key, EncryptedFilePath))
+                                {
+                                    string message = string.Format("UninstallPatch {0}", FilePath);
+                                    Log(message, LogLevel.Debug);
+                                    try
+                                    {
+                                        UninstallPatch(FilePath, Key);
+                                        _DecryptedAppPathCount++;
+                                    } catch (Exception ex)
+                                    {
+                                        Log(String.Format("Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString()), LogLevel.Error);
+                                        throw;
+                                    }
+                                }
                             }
                         }
+
                         KeyFileInfo.Delete();
-                        UninstallService();
+                        if (_ExistingAppPathCount > 0 && (_ExistingAppPathCount == _DecryptedAppPathCount))
+                        {
+                            UninstallService();
+                        }
                     }
                     else
                     {

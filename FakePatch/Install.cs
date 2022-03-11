@@ -374,7 +374,7 @@ namespace FakePatch
             }
             else
             {
-                Log(FilePath + " not found in registry.");
+                Log(FilePath + " not found.");
             }
         }
     }
