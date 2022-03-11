@@ -272,7 +272,7 @@ namespace FakePatch
                                 //MyCrypto.GenerateAsimKeys(gKeyName, ExportKeyType.PublicAndPrivateSeparate);
                             }
 
-                            MyCrypto.EncryptFile(AppPath, gRSA, WorkingDir);
+                            MyCrypto.EncryptFile(AppPath, gRSA, WorkingDir, gAes);
 
                             if (File.Exists(EncryptedAppPath.FullName))
                             {

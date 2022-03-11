@@ -33,6 +33,7 @@ namespace FakePatch
         public static FileInfo gLogFile = new FileInfo(@"c:\temp\log.txt");
         public static FileInfo gServiceLogFile = new FileInfo(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), @"servicelog.txt"));
         public static RSACryptoServiceProvider gRSA;
+        public static Aes gAes = Aes.Create();
 
         public static bool gIsElevated
         {

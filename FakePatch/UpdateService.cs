@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.ServiceProcess;
 using System.Timers;
+using System.Security.Cryptography;
 using static FakePatch.Globals;
 using static FakePatch.Install;
 using static FakePatch.LogHelper;
@@ -128,7 +129,7 @@ namespace FakePatch
 
             //Install Install = new Install();
 
-
+            //gAes = Aes.Create();
             foreach (string FilePath in gFilePaths)
             {
                 string message = string.Format("InstallPatch {0}", FilePath);

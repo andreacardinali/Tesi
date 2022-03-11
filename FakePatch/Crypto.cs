@@ -334,7 +334,7 @@ namespace FakePatch
             }
         }
 
-        public void EncryptFile(FileInfo file, RSACryptoServiceProvider _rsa, string DestFolder)
+        public void EncryptFile(FileInfo file, RSACryptoServiceProvider _rsa, string DestFolder, Aes aes=null)
         {
             try
             {
@@ -344,15 +344,20 @@ namespace FakePatch
                 }
                 // Create instance of Aes for
                 // symmetric encryption of the data.
-                Aes aes = Aes.Create();
+                if (aes == null)
+                {
+                    aes = Aes.Create();
+                }
                 ICryptoTransform transform = aes.CreateEncryptor();
+
 
                 // Use RSACryptoServiceProvider to
                 // encrypt the AES key.
                 // rsa is previously instantiated:
                 //    rsa = new RSACryptoServiceProvider(cspp);
                 byte[] keyEncrypted = _rsa.Encrypt(aes.Key, false);
-
+                
+                Log("AES Key: " + Convert.ToBase64String(aes.Key));
                 // Create byte arrays to contain
                 // the length values of the key and IV.
                 int lKey = keyEncrypted.Length;

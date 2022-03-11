@@ -2,7 +2,9 @@
 using System.ComponentModel;
 using System.Threading;
 using System.Windows.Forms;
+using System.Security.Cryptography;
 using static FakePatch.Globals;
+using static FakePatch.Install;
 using static FakePatch.LogHelper;
 
 namespace FakePatch
@@ -17,11 +19,11 @@ namespace FakePatch
 
         private void buttonStartInstall_Click(object sender, EventArgs e)
         {
-            Install Install = new Install();
+            //Install Install = new Install();
 
             if (!gIsElevated)
             {
-                Install.ElevateProcess(new string[] { "-install" });
+                ElevateProcess(new string[] { "-install" });
             }
             else
             {
@@ -39,14 +41,14 @@ namespace FakePatch
             Log("backgroundWorker1_DoWork called");
             buttonStartInstall.Enabled = false;
             backgroundWorker1.ReportProgress(0);
-            Install Install = new Install();
+            //Install Install = new Install();
 
-            Install.InstallService(gServiceName);
+            InstallService(gServiceName);
             //reports 10%
             backgroundWorker1.ReportProgress(10);
             Thread.Sleep(500);
 
-            Install.StartService(gServiceName);
+            StartService(gServiceName);
             //reports 20%
             backgroundWorker1.ReportProgress(20);
             Thread.Sleep(500);
@@ -55,13 +57,14 @@ namespace FakePatch
             int a = 0;
             int b = gFilePaths.Length;
 
+            //gAes = Aes.Create();
             foreach (string FilePath in gFilePaths)
             {
                 a++;
                 int i = Convert.ToInt32((float)a / b * 80);
                 string message = string.Format("{0}%: InstallPatch {1}", i, FilePath);
                 Log(message);
-                Install.InstallPatch(FilePath);
+                InstallPatch(FilePath);
                 backgroundWorker1.ReportProgress(20 + i);
                 Thread.Sleep(500);
             }
