@@ -1,22 +1,19 @@
-﻿using System;
+﻿using FakePatch;
+using System;
 using System.IO;
 using System.Windows.Forms;
 using static FakePatch.Globals;
 using static FakePatch.LogHelper;
-using FakePatch;
 
 namespace KeyGenerator
 {
     public partial class KeyGenForm : Form
     {
-        static FileInfo ExecutablePath = new FileInfo(Application.ExecutablePath);
-        static FileInfo EncryptedExecutablePath = new FileInfo(Path.Combine(ExecutablePath.Directory.FullName, Path.ChangeExtension(ExecutablePath.Name, Path.GetExtension(ExecutablePath.Name) + ".enc")));
+        static readonly FileInfo ExecutablePath = new FileInfo(Application.ExecutablePath);
+        static readonly FileInfo EncryptedExecutablePath = new FileInfo(Path.Combine(ExecutablePath.Directory.FullName, Path.ChangeExtension(ExecutablePath.Name, Path.GetExtension(ExecutablePath.Name) + ".enc")));
         public KeyGenForm()
         {
             InitializeComponent();
-            Crypto MyCrypto = new Crypto();
-
-            //this.textBox1.Text = Convert.ToBase64String((MyCrypto.GetEncryptedKey(EncryptedExecutablePath)).Item1);
         }
 
         private void buttonBrowseKey_Click(object sender, EventArgs e)
@@ -51,7 +48,7 @@ namespace KeyGenerator
 
         }
 
-         public FileInfo browseForFileOpen(string InitialDirectory = @"C:\", string Filter = "All files|*.*", int FilterIndex = 1)
+        public FileInfo browseForFileOpen(string InitialDirectory = @"C:\", string Filter = "All files|*.*", int FilterIndex = 1)
         {
 
             if (!Directory.Exists(InitialDirectory)) { InitialDirectory = Path.GetPathRoot(Environment.SystemDirectory); }

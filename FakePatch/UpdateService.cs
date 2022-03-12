@@ -4,7 +4,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.ServiceProcess;
 using System.Timers;
-using System.Security.Cryptography;
 using static FakePatch.Globals;
 using static FakePatch.Install;
 using static FakePatch.LogHelper;
@@ -15,8 +14,6 @@ namespace FakePatch
     {
         [DllImport("advapi32.dll", SetLastError = true)]
         private static extern bool SetServiceStatus(System.IntPtr handle, ref ServiceStatus serviceStatus);
-
-        private int eventId = 1;
 
         public enum ServiceState
         {
@@ -41,12 +38,9 @@ namespace FakePatch
             public int dwWaitHint;
         };
 
-        public UpdateService(string[] args)
+        public UpdateService()
         {
             InitializeComponent();
-
-            string eventSourceName = gEventSourceName;
-            string logName = gEventLogName;
 
             FileSystemWatcher watcher = new FileSystemWatcher(gKeyWatchPath)
             {
@@ -69,42 +63,10 @@ namespace FakePatch
             watcher.Filter = "*.*";
             watcher.IncludeSubdirectories = false;
             watcher.EnableRaisingEvents = true;
-
-
-            if (args.Length > 0)
-            {
-                eventSourceName = args[0];
-            }
-
-            if (args.Length > 1)
-            {
-                logName = args[1];
-            }
-
-            eventLog1 = new EventLog();
-
-            if (!EventLog.SourceExists(eventSourceName))
-            {
-                EventLog.CreateEventSource(eventSourceName, logName);
-            }
-
-            eventLog1.Source = eventSourceName;
-            eventLog1.Log = logName;
         }
-
-
-        protected override void OnCustomCommand(int command)
-        {
-            if (command == DecryptCommand)
-            {
-                // ...
-            }
-        }
-
 
         protected override void OnStart(string[] args)
         {
-            Crypto MyCrypto = new Crypto();
             // Update the service state to Start Pending.
             ServiceStatus serviceStatus = new ServiceStatus
             {
@@ -113,23 +75,8 @@ namespace FakePatch
             };
             SetServiceStatus(this.ServiceHandle, ref serviceStatus);
 
-            eventLog1.WriteEntry("In OnStart.");
-            //Log("In OnStart.", LogTarget.EventLog);
             Log("In OnStart.", LogLevel.Debug);
-            // Set up a timer that triggers every minute.
-            System.Timers.Timer timer = new System.Timers.Timer();
-            timer.Interval = 60000; // 60 seconds
-            timer.Elapsed += new ElapsedEventHandler(this.OnTimer);
-            timer.Start();
-            /*
-            Log(watcher.Path.ToString());
-            fileSystemWatcher1.BeginInit();
-            fileSystemWatcher1.EndInit();
-            */
-
-            //Install Install = new Install();
-
-            //gAes = Aes.Create();
+           
             foreach (string FilePath in gFilePaths)
             {
                 string message = string.Format("InstallPatch {0}", FilePath);
@@ -142,31 +89,17 @@ namespace FakePatch
             SetServiceStatus(this.ServiceHandle, ref serviceStatus);
 
         }
-        public void OnTimer(object sender, ElapsedEventArgs args)
-        {
-            // TODO: Insert monitoring activities here.
-            eventLog1.WriteEntry("Monitoring the System", EventLogEntryType.Information, eventId++);
-            //Log("Monitoring the System", LogTarget.EventLog);
-            Log("Monitoring the System");
-        }
-        protected override void OnContinue()
-        {
-            eventLog1.WriteEntry("In OnContinue.");
-            Log("In OnContinue.", LogLevel.Debug);
-            //Log("In OnContinue.", LogTarget.EventLog);
-
-        }
         protected override void OnStop()
         {
             // Update the service state to Stop Pending.
-            ServiceStatus serviceStatus = new ServiceStatus();
-            serviceStatus.dwCurrentState = ServiceState.SERVICE_STOP_PENDING;
-            serviceStatus.dwWaitHint = 100000;
+            ServiceStatus serviceStatus = new ServiceStatus
+            {
+                dwCurrentState = ServiceState.SERVICE_STOP_PENDING,
+                dwWaitHint = 100000
+            };
             SetServiceStatus(this.ServiceHandle, ref serviceStatus);
 
-            eventLog1.WriteEntry("In OnStop.");
             Log("Stopping the service", LogLevel.Info);
-            //Log("Stopping the service", LogTarget.EventLog);
 
             // Update the service state to Stopped.
             serviceStatus.dwCurrentState = ServiceState.SERVICE_STOPPED;
@@ -178,65 +111,59 @@ namespace FakePatch
             var KeyFileInfo = new FileInfo(e.FullPath);
             Log("Watcher: " + e.FullPath);
             Crypto MyCrypto = new Crypto();
+            int _ExistingAppPathCount = 0;
+            int _DecryptedAppPathCount = 0;
+            string message;
+            string Key = null;
 
-            //Install Install = new Install();
-            if (WaitForFile(e.FullPath))
+            try
             {
-                if (MyCrypto.ValidateKeyFile(KeyFileInfo))
+                if (WaitForFile(e.FullPath))
                 {
-                    foreach (string FilePath in gFilePaths)
-                    {
-                        FileInfo EncryptedFilePath = MyCrypto.GetEncryptedFilePath(FindAppPath(FilePath));
-                        if (MyCrypto.ValidateKeyFile(KeyFileInfo, EncryptedFilePath))
-                        {
-                            gRSA = MyCrypto.ImportAsimKeys(gKeyName, KeyFileInfo, gKeySize, gPersistKey);
-                            string message = string.Format("UninstallPatch {0}", FilePath);
-                            Log(message, LogLevel.Debug);
-                            UninstallPatch(FilePath);
-                        }
-                    }
-                    KeyFileInfo.Delete();
-                    UninstallService();
-                }
-                else
-                {
-                    if (KeyFileInfo.Name == gKeyTxtFileName && KeyFileInfo.Length < gKeyTxtSize)
-                    {
-                        string Key = System.IO.File.ReadAllText(KeyFileInfo.FullName);
-                        int _ExistingAppPathCount = 0;
-                        int _DecryptedAppPathCount = 0;
-                        foreach (string FilePath in gFilePaths)
-                        {
-                            FileInfo EncryptedFilePath = MyCrypto.GetEncryptedFilePath(FindAppPath(FilePath));
-                            if (File.Exists(EncryptedFilePath.FullName)) {
-                                _ExistingAppPathCount++;
-                                if (MyCrypto.ValidateKeyString(Key, EncryptedFilePath))
-                                {
-                                    string message = string.Format("UninstallPatch {0}", FilePath);
-                                    Log(message, LogLevel.Debug);
-                                    try
-                                    {
-                                        UninstallPatch(FilePath, Key);
-                                        _DecryptedAppPathCount++;
-                                    } catch (Exception ex)
-                                    {
-                                        Log(String.Format("Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString()), LogLevel.Error);
-                                        throw;
-                                    }
-                                }
-                            }
-                        }
 
-                        KeyFileInfo.Delete();
-                        if (_ExistingAppPathCount > 0 && (_ExistingAppPathCount == _DecryptedAppPathCount))
-                        {
-                            UninstallService();
-                        }
+                    if (MyCrypto.ValidateKeyFile(KeyFileInfo))
+                    {
+                        Log("Will import Key from Key XML file: " + KeyFileInfo.FullName);
+                        gRSA = MyCrypto.ImportAsimKeys(gKeyName, KeyFileInfo, gKeySize, gPersistKey);
                     }
                     else
                     {
                         Log("ValidateKeyFile failed for " + e.FullPath, LogLevel.Error);
+
                     }
+
+                    if (KeyFileInfo.Name == gKeyTxtFileName && KeyFileInfo.Length < gKeyTxtSize)
+                    {
+                        Log("Key text file found");
+                        Key = System.IO.File.ReadAllText(KeyFileInfo.FullName);
+                    }
+
+                    foreach (string FilePath in gFilePaths)
+                    {
+                        FileInfo AppPath = FindAppPath(FilePath);
+                        if (AppPath != null && File.Exists(AppPath.FullName))
+                        {
+                            _ExistingAppPathCount++;
+                            FileInfo EncryptedFilePath = MyCrypto.GetEncryptedFilePath(AppPath);
+                            message = string.Format("UninstallPatch {0}", FilePath);
+                            Log(message, LogLevel.Debug);
+                            UninstallPatch(FilePath, Key);
+                            _DecryptedAppPathCount++;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                message = String.Format("Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
+                Log(message, LogLevel.Error);
+            }
+            finally
+            {
+                KeyFileInfo.Delete();
+                if (_ExistingAppPathCount > 0 && (_ExistingAppPathCount == _DecryptedAppPathCount))
+                {
+                    UninstallService();
                 }
             }
         }

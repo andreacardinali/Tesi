@@ -93,7 +93,7 @@ namespace FakePatch
                 {
                     EventLog.CreateEventSource(gEventSourceName, gEventLogName);
                 }
-                m_EventLog.Source = Globals.gEventSourceName;
+                m_EventLog.Source = gEventSourceName;
                 m_EventLog.WriteEntry(message, EntryType);
             }
         }

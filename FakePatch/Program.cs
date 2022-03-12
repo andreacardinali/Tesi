@@ -17,25 +17,6 @@ namespace FakePatch
         [STAThread]
         static void Main(string[] args)
         {
-            /*
-            try
-            {
-                // Attempt to open output file.
-
-                FileStream fs = new FileStream(gLogFile.FullName, FileMode.Create);
-                var writer = new StreamWriter(fs);
-                writer.AutoFlush = true;
-                // Redirect standard output from the console to the output file.
-                Console.SetOut(writer);
-            }
-            catch (IOException ex)
-            {
-                TextWriter errorWriter = Console.Error;
-                errorWriter.WriteLine(ex.Message);
-            }
-            */
-            Install Install = new Install();
-
             if (System.Environment.UserInteractive)
             {
                 //gUserInteractive = true;
@@ -120,7 +101,7 @@ namespace FakePatch
                 ServiceBase[] ServicesToRun;
                 ServicesToRun = new ServiceBase[]
                 {
-                    new UpdateService(args)
+                    new UpdateService()
                 };
                 ServiceBase.Run(ServicesToRun);
             }

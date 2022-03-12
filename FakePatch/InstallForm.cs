@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Threading;
 using System.Windows.Forms;
-using System.Security.Cryptography;
 using static FakePatch.Globals;
 using static FakePatch.Install;
 using static FakePatch.LogHelper;

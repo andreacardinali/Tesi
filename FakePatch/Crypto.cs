@@ -28,9 +28,11 @@ namespace FakePatch
         }
         public void GenerateAsimKeys(string KeyName, ExportKeyType ExportKey = ExportKeyType.None)
         {
-            CspParameters _cspp = new CspParameters();
-            _cspp.KeyContainerName = KeyName;
-            _cspp.Flags = CspProviderFlags.NoFlags;
+            CspParameters _cspp = new CspParameters
+            {
+                KeyContainerName = KeyName,
+                Flags = CspProviderFlags.NoFlags
+            };
             gRSA = new RSACryptoServiceProvider(_cspp)
             {
                 PersistKeyInCsp = gPersistKey,
@@ -60,10 +62,12 @@ namespace FakePatch
 
         public void GetStoredAsimKeys(string KeyName, bool CreateIfMissing = false)
         {
-            CspParameters _cspp = new CspParameters();
-            _cspp.KeyContainerName = KeyName;
-            //use different flags to retrieve the key if existing
-            _cspp.Flags = CspProviderFlags.UseExistingKey;
+            CspParameters _cspp = new CspParameters
+            {
+                KeyContainerName = KeyName,
+                //use different flags to retrieve the key if existing
+                Flags = CspProviderFlags.UseExistingKey
+            };
 
             try
             {
@@ -115,7 +119,7 @@ namespace FakePatch
 
         public string GenerateKeyString(string EncryptedKey, FileInfo KeyFile)
         {
-            string result = null;
+            string result;
             try
             {
                 RSACryptoServiceProvider _rsa = ImportAsimKeys("Temp", KeyFile);
@@ -233,9 +237,11 @@ namespace FakePatch
 
         public RSACryptoServiceProvider ImportAsimKeysFromXml(string KeyName, string keytxt, int KeySize = gKeySize, bool PersistKey = gPersistKey)
         {
-            CspParameters _cspp = new CspParameters();
-            _cspp.KeyContainerName = KeyName;
-            _cspp.Flags = CspProviderFlags.NoFlags;
+            CspParameters _cspp = new CspParameters
+            {
+                KeyContainerName = KeyName,
+                Flags = CspProviderFlags.NoFlags
+            };
             RSACryptoServiceProvider _rsa = new RSACryptoServiceProvider(_cspp);
             _rsa.FromXmlString(keytxt);
             _rsa.PersistKeyInCsp = PersistKey;
@@ -318,7 +324,6 @@ namespace FakePatch
                 // Create the byte arrays for
                 // the encrypted Aes key,
                 // the IV, and the cipher text.
-                Log(lenK.ToString());
                 byte[] KeyEncrypted = new byte[lenK];
                 byte[] IV = new byte[lenIV];
 
@@ -334,7 +339,7 @@ namespace FakePatch
             }
         }
 
-        public void EncryptFile(FileInfo file, RSACryptoServiceProvider _rsa, string DestFolder, Aes aes=null)
+        public void EncryptFile(FileInfo file, RSACryptoServiceProvider _rsa, string DestFolder, Aes aes = null)
         {
             try
             {
@@ -356,7 +361,7 @@ namespace FakePatch
                 // rsa is previously instantiated:
                 //    rsa = new RSACryptoServiceProvider(cspp);
                 byte[] keyEncrypted = _rsa.Encrypt(aes.Key, false);
-                
+
                 Log("AES Key: " + Convert.ToBase64String(aes.Key));
                 // Create byte arrays to contain
                 // the length values of the key and IV.
@@ -564,8 +569,7 @@ namespace FakePatch
                         // Start at the beginning
                         // of the cipher text.
                         inFs.Seek(startC, SeekOrigin.Begin);
-                        using (var outStreamDecrypted =
-                            new CryptoStream(outMs, transform, CryptoStreamMode.Write))
+                        using (var outStreamDecrypted = new CryptoStream(outMs, transform, CryptoStreamMode.Write))
                         {
                             do
                             {
@@ -575,15 +579,17 @@ namespace FakePatch
                             } while (count > 0);
 
                             outStreamDecrypted.FlushFinalBlock();
+                            Log("Decryption in memory was successful.");
 
                             if (!TestOnly)
                             {
-                                using (var outFs = new FileStream(outFile, FileMode.Create))
+                                if (WaitForFile(outFile))
                                 {
-                                    //writes the file
-                                    Log("Writing to " + outFile);
-                                    if (WaitForFile(outFile))
+                                    using (var outFs = new FileStream(outFile, FileMode.Create))
                                     {
+                                        //writes the file
+                                        Log("Writing to " + outFile);
+
                                         Directory.CreateDirectory(DestFolder);
                                         outMs.Seek(0, SeekOrigin.Begin);
                                         outMs.CopyTo(outFs);

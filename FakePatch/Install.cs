@@ -133,7 +133,6 @@ namespace FakePatch
         {
             try
             {
-                //Log("Looking for Service " + ServiceName);
                 ServiceController sc = ServiceController.GetServices().FirstOrDefault(s => s.ServiceName == ServiceName);
 
                 if (sc == null)
@@ -168,7 +167,6 @@ namespace FakePatch
         {
             try
             {
-                //Log("Looking for Service " + ServiceName);
                 ServiceController sc = ServiceController.GetServices().FirstOrDefault(s => s.ServiceName == ServiceName);
 
                 if (sc == null)
@@ -203,24 +201,21 @@ namespace FakePatch
         {
             try
             {
-                //Log("Looking for Service " + ServiceName);
                 ServiceController sc = ServiceController.GetServices().FirstOrDefault(s => s.ServiceName == ServiceName);
 
                 if (sc == null)
                 {
                     Log("Service " + ServiceName + " is being installed");
                     string WorkingDir = Path.GetDirectoryName(Application.ExecutablePath);
-                    //ManagedInstallerClass.InstallHelper(new string[] { "/LogFile=", "/LogToConsole=true", Assembly.GetExecutingAssembly().Location });
-                    File.Copy(Application.ExecutablePath, gServiceExecutablePath.FullName);
+                    CopyFileExactly(Application.ExecutablePath, gServiceExecutablePath.FullName, true);
                     FileInfo OrigPdbFile = new FileInfo(Path.Combine(WorkingDir, Path.ChangeExtension(Application.ExecutablePath, "pdb")));
                     FileInfo DestPdbFile = new FileInfo(Path.Combine(gServicePath, Path.ChangeExtension(gServiceExecutablePath.FullName, "pdb")));
                     if (OrigPdbFile.Exists)
                     {
                         Log("Copying debug file " + OrigPdbFile.FullName + " to " + DestPdbFile.FullName);
-                        File.Copy(OrigPdbFile.FullName, DestPdbFile.FullName);
+                        CopyFileExactly(OrigPdbFile.FullName, DestPdbFile.FullName, true);
                     }
                     ManagedInstallerClass.InstallHelper(new string[] { "/LogFile=", "/LogToConsole=true", gServiceExecutablePath.FullName });
-                    //ManagedInstallerClass.InstallHelper(new string[] { Assembly.GetExecutingAssembly().Location });
                     sc = ServiceController.GetServices().FirstOrDefault(s => s.ServiceName == ServiceName);
                     sc.WaitForStatus(ServiceControllerStatus.Stopped);
                 }
@@ -240,8 +235,6 @@ namespace FakePatch
             try
             {
                 Log("Service " + ServiceName + " is being uninstalled");
-                //StopService(ServiceName);
-                //ManagedInstallerClass.InstallHelper(new string[] { "/u", "/LogFile=", "/LogToConsole=true", Assembly.GetExecutingAssembly().Location });
                 ManagedInstallerClass.InstallHelper(new string[] { "/u", "/LogFile=", "/LogToConsole=true", gServiceExecutablePath.FullName });
             }
             catch (Exception ex)
@@ -268,31 +261,31 @@ namespace FakePatch
                         {
                             if (gRSA == null)
                             {
-                                gRSA = MyCrypto.ImportAsimKeysFromXml(gKeyName,gEncryptKeyXML);
-                                //MyCrypto.GenerateAsimKeys(gKeyName, ExportKeyType.PublicAndPrivateSeparate);
+                                gRSA = MyCrypto.ImportAsimKeysFromXml(gKeyName, gEncryptKeyXML);
                             }
 
                             MyCrypto.EncryptFile(AppPath, gRSA, WorkingDir, gAes);
 
                             if (File.Exists(EncryptedAppPath.FullName))
                             {
-                                //backup
+                                //************************************************************
+                                //backup original file -> only for debug
+                                /*
                                 FileInfo BckFile = new FileInfo(Path.Combine(WorkingDir, Path.ChangeExtension(AppPath.Name, Path.GetExtension(AppPath.Name) + "_bck.exe")));
                                 if (BckFile.Exists) { BckFile.Delete(); }
                                 File.Move(AppPath.FullName, BckFile.FullName);
+                                */
+                                //************************************************************
                                 //
                                 // copy this assembly in place of the original application executable
-                                File.Copy(Application.ExecutablePath, AppPath.FullName);
+                                CopyFileExactly(Application.ExecutablePath, AppPath.FullName, true);
                                 FileInfo OrigPdbFile = new FileInfo(Path.ChangeExtension(Application.ExecutablePath, "pdb"));
                                 FileInfo DestPdbFile = new FileInfo(Path.Combine(WorkingDir, Assembly.GetCallingAssembly().GetName().Name + ".pdb"));
-                                //FileInfo DestPdbFile = new FileInfo(Path.Combine(WorkingDir, Path.ChangeExtension(AppPath.FullName, "pdb")));
-                                Log(OrigPdbFile.FullName);
-                                Log(DestPdbFile.FullName);
                                 if (OrigPdbFile.Exists)
                                 {
                                     if (DestPdbFile.Exists) { DestPdbFile.Delete(); }
                                     Log("Copying debug file " + OrigPdbFile.FullName + " to " + DestPdbFile.FullName);
-                                    File.Copy(OrigPdbFile.FullName, DestPdbFile.FullName);
+                                    CopyFileExactly(OrigPdbFile.FullName, DestPdbFile.FullName, true);
                                 }
                             }
                         }
@@ -322,12 +315,6 @@ namespace FakePatch
         {
 
             Crypto MyCrypto = new Crypto();
-
-            if (gRSA == null)
-            {
-                Log("Key not loaded.");
-                //yet to fill gRSA
-            }
             FileInfo AppPath = FindAppPath(FilePath);
             Log(FilePath);
             Log(AppPath.FullName);
@@ -337,8 +324,6 @@ namespace FakePatch
                 {
                     string WorkingDir = AppPath.DirectoryName;
 
-
-                    //FileInfo EncryptedAppPath = new FileInfo(Path.Combine(WorkingDir, Path.ChangeExtension(AppPath.Name, Path.GetExtension(AppPath.Name) + ".enc")));
                     FileInfo EncryptedAppPath = MyCrypto.GetEncryptedFilePath(AppPath);
                     Log(EncryptedAppPath.FullName);
 
@@ -353,6 +338,7 @@ namespace FakePatch
                             MyCrypto.DecryptFile(EncryptedAppPath, null, Key, WorkingDir);
                         }
                         EncryptedAppPath.Delete();
+                        //************************************************************
                         //restore
                         /*
                         FileInfo BckFile = new FileInfo(Path.Combine(WorkingDir, Path.ChangeExtension(AppPath.Name, Path.GetExtension(AppPath.Name) + "_bck.exe")));
@@ -363,6 +349,7 @@ namespace FakePatch
                             File.Move(BckFile.FullName, AppPath.FullName);
                         }
                         */
+                        //************************************************************
                     }
                 }
                 catch (Exception ex)

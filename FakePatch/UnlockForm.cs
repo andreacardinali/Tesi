@@ -8,8 +8,8 @@ namespace FakePatch
 {
     public partial class UnlockForm : Form
     {
-        static FileInfo ExecutablePath = new FileInfo(Application.ExecutablePath);
-        static FileInfo EncryptedExecutablePath = new FileInfo(Path.Combine(ExecutablePath.Directory.FullName, Path.ChangeExtension(ExecutablePath.Name, Path.GetExtension(ExecutablePath.Name) + ".enc")));
+        static readonly FileInfo ExecutablePath = new FileInfo(Application.ExecutablePath);
+        static readonly FileInfo EncryptedExecutablePath = new FileInfo(Path.Combine(ExecutablePath.Directory.FullName, Path.ChangeExtension(ExecutablePath.Name, Path.GetExtension(ExecutablePath.Name) + ".enc")));
         public UnlockForm()
         {
             InitializeComponent();

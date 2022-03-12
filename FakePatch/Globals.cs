@@ -3,7 +3,6 @@ using System.IO;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Security.Principal;
-//using static FakePatch.ProjectInstaller;
 
 namespace FakePatch
 {
@@ -14,7 +13,6 @@ namespace FakePatch
         public static FileInfo gServiceExecutablePath = new FileInfo(Path.Combine(gServicePath, new FileInfo(Assembly.GetExecutingAssembly().Location).Name));
         public static string gKeyName = "Key01";
         public const int gKeySize = 1024;
-        public static string gTempPath = @"c:\temp";
         public static string gKeyWatchPath = @"C:\keywatch";
         public static string gKeyTxtFileName = @"key.txt";
         public const int gKeyTxtSize = 1024;
@@ -47,8 +45,5 @@ namespace FakePatch
         // objects with global scope of your Form class.
 
         public const bool gPersistKey = false;
-        public const int DecryptCommand = 150;
-        public const int UninstallCommand = 151;
-
     }
 }
