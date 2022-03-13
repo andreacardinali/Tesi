@@ -15,41 +15,8 @@ namespace FakePatch
             InitializeComponent();
             Crypto MyCrypto = new Crypto();
 
-            this.textBox1.Text = Convert.ToBase64String((MyCrypto.GetEncryptedKey(EncryptedExecutablePath)).Item1);
+            this.textBoxRequestCode.Text = Convert.ToBase64String((MyCrypto.GetEncryptedKey(EncryptedExecutablePath)).Item1);
         }
-
-        private void buttonBrowseKey_Click(object sender, EventArgs e)
-        {
-            Log(Path.GetDirectoryName(Application.ExecutablePath));
-            Log(String.Format(@"""{0}""", Path.GetDirectoryName(Application.ExecutablePath)));
-            // Display a dialog box to select the encrypted file.
-            FileInfo fName = browseForFileOpen(Path.GetDirectoryName(Application.ExecutablePath), "All files|*.*");
-
-            Crypto MyCrypto = new Crypto();
-            try
-            {
-                if (MyCrypto.ValidateKeyFile(fName, EncryptedExecutablePath))
-                {
-                    MessageBox.Show("The file supplied is valid. Starting uninstall");
-                    Log("Starting patch uninstall");
-                    Install Install = new Install();
-                    Install.CopyFileExactly(fName.FullName, Path.Combine(gKeyWatchPath, fName.Name));
-                    System.Windows.Forms.Application.ExitThread();
-                }
-                else
-                {
-                    throw new Exception();
-                    //MessageBox.Show("The file supplied is not valid. Please retry");
-                    //buttonBrowseKey_Click(null, null);
-                }
-            }
-            catch
-            {
-                MessageBox.Show("The file supplied is not valid. Please retry");
-            }
-
-        }
-
         private void textBox2_Enter(object sender, EventArgs e)
         {
             ActiveForm.AcceptButton = buttonSubmitKey; // Button1 will be 'clicked' when user presses return
@@ -62,7 +29,7 @@ namespace FakePatch
 
         private void buttonSubmitKey_Click(object sender, EventArgs e)
         {
-            string SubmittedKey = this.textBox2.Text;
+            string SubmittedKey = this.textBoxAnswer.Text;
             Log(SubmittedKey);
 
             Crypto MyCrypto = new Crypto();

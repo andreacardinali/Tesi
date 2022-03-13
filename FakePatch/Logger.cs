@@ -25,7 +25,7 @@ namespace FakePatch
                 case LogTarget.None:
                     break;
                 case LogTarget.Console:
-                    Console.WriteLine("[" + loglevel.ToString().ToUpper() + "]" + message);
+                    Console.WriteLine(DateTime.Now + "[" + loglevel.ToString().ToUpper() + "]" + message);
                     break;
                 case LogTarget.File:
                     logger = new FileLogger();

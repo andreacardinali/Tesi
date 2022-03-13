@@ -2,8 +2,8 @@
 using System.IO;
 using System.Security.Cryptography;
 using System.Xml.Linq;
+using static FakePatch.FileOperations;
 using static FakePatch.Globals;
-using static FakePatch.Install;
 using static FakePatch.LogHelper;
 
 namespace FakePatch
@@ -122,10 +122,10 @@ namespace FakePatch
             string result;
             try
             {
-                RSACryptoServiceProvider _rsa = ImportAsimKeys("Temp", KeyFile);
                 byte[] ConvertedKey = Convert.FromBase64String(EncryptedKey);
                 if (ConvertedKey.Length == 128)
                 {
+                    RSACryptoServiceProvider _rsa = ImportAsimKeys("Temp", KeyFile);
                     byte[] DecryptedKey = DecryptKey(ConvertedKey, _rsa);
 
                     result = Convert.ToBase64String(DecryptedKey);

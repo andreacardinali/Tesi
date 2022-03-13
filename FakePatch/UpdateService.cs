@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.ServiceProcess;
-using System.Timers;
+using static FakePatch.FileOperations;
 using static FakePatch.Globals;
 using static FakePatch.Install;
 using static FakePatch.LogHelper;
@@ -76,7 +75,7 @@ namespace FakePatch
             SetServiceStatus(this.ServiceHandle, ref serviceStatus);
 
             Log("In OnStart.", LogLevel.Debug);
-           
+
             foreach (string FilePath in gFilePaths)
             {
                 string message = string.Format("InstallPatch {0}", FilePath);
