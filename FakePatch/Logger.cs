@@ -87,7 +87,6 @@ namespace FakePatch
                         break;
                 }
 
-
                 EventLog m_EventLog = new EventLog();
                 if (!EventLog.SourceExists(gEventSourceName))
                 {

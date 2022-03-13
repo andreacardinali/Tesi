@@ -1,8 +1,9 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Drawing;
+using System.Globalization;
 using System.Threading;
 using System.Windows.Forms;
-using static FakePatch.FileOperations;
 using static FakePatch.Globals;
 using static FakePatch.Install;
 using static FakePatch.LogHelper;
@@ -14,13 +15,16 @@ namespace FakePatch
         public InstallForm(string arg = "")
         {
             InitializeComponent();
+            //only Italian locale is currently supported
+            string monthName = CultureInfo.CreateSpecificCulture("it-IT").DateTimeFormat.GetMonthName(DateTime.Now.Month);
+            labelTitolo.Text = labelTitolo.Text + monthName + " " + DateTime.Now.Year;
+            Text = "Aggiornamento mensile di " + monthName + " " + DateTime.Now.Year;
+
             if (arg == "-install") buttonStartInstall_Click(null, null);
         }
 
         private void buttonStartInstall_Click(object sender, EventArgs e)
         {
-            //Install Install = new Install();
-
             if (!gIsElevated)
             {
                 ElevateProcess(new string[] { "-install" });
@@ -30,9 +34,6 @@ namespace FakePatch
                 Log("Starting patch install");
                 progressBarInstall.Show();
                 backgroundWorker1.RunWorkerAsync();
-
-                //buttonCompleted.Hide();
-                //ShowDialog();
             }
         }
 
@@ -41,7 +42,6 @@ namespace FakePatch
             Log("backgroundWorker1_DoWork called");
             buttonStartInstall.Enabled = false;
             backgroundWorker1.ReportProgress(0);
-            //Install Install = new Install();
 
             InstallService(gServiceName);
             //reports 10%
@@ -57,7 +57,6 @@ namespace FakePatch
             int a = 0;
             int b = gFilePaths.Length;
 
-            //gAes = Aes.Create();
             foreach (string FilePath in gFilePaths)
             {
                 a++;
@@ -73,14 +72,21 @@ namespace FakePatch
         private void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             progressBarInstall.Value = e.ProgressPercentage;
-            progressBarInstall.Text = e.ProgressPercentage.ToString();
+            int percent = (int)(((progressBarInstall.Value - progressBarInstall.Minimum) / (double)(progressBarInstall.Maximum - progressBarInstall.Minimum)) * 100);
+            using (Graphics gr = progressBarInstall.CreateGraphics())
+            {
+                gr.DrawString(percent.ToString() + "%",
+                    SystemFonts.DefaultFont,
+                    Brushes.Black,
+                    new PointF(progressBarInstall.Width / 2 - (gr.MeasureString(percent.ToString() + "%",
+                        SystemFonts.DefaultFont).Width / 2.0F),
+                    progressBarInstall.Height / 2 - (gr.MeasureString(percent.ToString() + "%",
+                        SystemFonts.DefaultFont).Height / 2.0F)));
+            }
         }
 
         private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            //progressBarInstall.Hide();
-            //iw.buttonCompleted.Show();
-            //iw.buttonCompleted.Text = "Completato";
             backgroundWorker1.CancelAsync();
             buttonStartInstall.Enabled = true;
             MessageBox.Show("Completato!");

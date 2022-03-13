@@ -16,7 +16,6 @@ namespace KeyGenerator
 
         public FileInfo browseForFileOpen(string InitialDirectory = @"C:\", string Filter = "All files|*.*", int FilterIndex = 1)
         {
-
             if (!Directory.Exists(InitialDirectory)) { InitialDirectory = Path.GetPathRoot(Environment.SystemDirectory); }
 
             _openFileDialog.InitialDirectory = InitialDirectory;
@@ -39,8 +38,6 @@ namespace KeyGenerator
 
         private void buttonBrowseFileForKey_Click(object sender, EventArgs e)
         {
-            Log(Path.GetDirectoryName(Application.ExecutablePath));
-            Log(String.Format(@"""{0}""", Path.GetDirectoryName(Application.ExecutablePath)));
             // Display a dialog box to select the encrypted file.
             FileInfo fName = browseForFileOpen(Path.GetDirectoryName(Application.ExecutablePath), "All files|*.*");
             if (fName.Exists)

@@ -1,10 +1,7 @@
 ﻿using Microsoft.Win32;
 using System;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Threading;
-using System.Windows.Forms;
 using static FakePatch.LogHelper;
 
 namespace FakePatch
@@ -28,35 +25,7 @@ namespace FakePatch
             destination.LastAccessTime = origin.LastAccessTime;
         }
 
-        public static void ElevateProcess(string[] args = null)
-        {
-            //Public domain; no attribution required.
-            const int ERROR_CANCELLED = 1223; //The operation was canceled by the user.
-
-            var info = new System.Diagnostics.ProcessStartInfo
-            {
-                UseShellExecute = true,
-                WorkingDirectory = Environment.CurrentDirectory,
-                FileName = Application.ExecutablePath,
-                Verb = "runas",
-            };
-
-            if (args != null) info.Arguments = string.Join(" ", args);
-
-            try
-            {
-                Process.Start(info);
-                System.Windows.Forms.Application.ExitThread();
-            }
-            catch (Win32Exception ex)
-            {
-                if (ex.NativeErrorCode == ERROR_CANCELLED)
-                    MessageBox.Show("Why you no select Yes?");
-                else
-                    throw;
-            }
-        }
-        public static Boolean WaitForFile(String filePath)
+        public static bool WaitForFile(String filePath)
         {
             Int32 tries = 0;
             int MaxAttempts = 10;
@@ -64,7 +33,7 @@ namespace FakePatch
             while (true)
             {
                 ++tries;
-                Boolean wait = false;
+                bool wait = false;
                 FileStream stream = null;
 
                 try
@@ -98,6 +67,7 @@ namespace FakePatch
 
             return true;
         }
+
         public static FileInfo FindAppPath(string ExeName)
         {
             FileInfo AppPath = null;

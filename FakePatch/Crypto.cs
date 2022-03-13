@@ -26,96 +26,6 @@ namespace FakePatch
             Log("Decrypted path: " + DecryptedFilePath.FullName + " - Encrypted path: " + EncryptedFilePath.FullName);
             return EncryptedFilePath;
         }
-        public void GenerateAsimKeys(string KeyName, ExportKeyType ExportKey = ExportKeyType.None)
-        {
-            CspParameters _cspp = new CspParameters
-            {
-                KeyContainerName = KeyName,
-                Flags = CspProviderFlags.NoFlags
-            };
-            gRSA = new RSACryptoServiceProvider(_cspp)
-            {
-                PersistKeyInCsp = gPersistKey,
-                KeySize = gKeySize
-            };
-            Log($"Key created in container {KeyName}: \n {gRSA.ToXmlString(true)}");
-
-            switch (ExportKey)
-            {
-                case ExportKeyType.None:
-                    break;
-                case ExportKeyType.Public:
-                    //Log($"Exporting Public Key to {gPubKeyFile.FullName}");
-                    this.ExportAsimKeys(gKeyName, gPubKeyFile, false);
-                    break;
-                case ExportKeyType.PublicAndPrivate:
-                    //Log($"Exporting Private and Public Key to {gKeyFile.FullName}");
-                    this.ExportAsimKeys(gKeyName, gKeyFile, true);
-                    break;
-                case ExportKeyType.PublicAndPrivateSeparate:
-                    //Log($"Exporting Public Key to {gPubKeyFile.FullName}");
-                    this.ExportAsimKeys(gKeyName, gPubKeyFile, false);
-                    this.ExportAsimKeys(gKeyName, gKeyFile, true);
-                    break;
-            }
-        }
-
-        public void GetStoredAsimKeys(string KeyName, bool CreateIfMissing = false)
-        {
-            CspParameters _cspp = new CspParameters
-            {
-                KeyContainerName = KeyName,
-                //use different flags to retrieve the key if existing
-                Flags = CspProviderFlags.UseExistingKey
-            };
-
-            try
-            {
-                gRSA = new RSACryptoServiceProvider(_cspp)
-                {
-                    PersistKeyInCsp = gPersistKey
-                };
-                Log($"Key retrieved from container {KeyName}: \n {gRSA.ToXmlString(true)}");
-                //Console.WriteLine($"Key retrieved from container {KeyName}: \n {gRSA.ToXmlString(true)}");
-                //return _rsa;
-            }
-            catch (CryptographicException)
-            {
-                Log($"Key not found in container {KeyName}");
-                if (CreateIfMissing)
-                {
-                    GenerateAsimKeys(KeyName);
-                    //_rsa = GenerateAsimKeys(KeyName);
-                    //return _rsa;
-                }
-                else
-                {
-                    //return null;
-                }
-            }
-            catch (Exception ex)
-            {
-                string message = String.Format("Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
-                Log(message, LogLevel.Error);
-            }
-
-        }
-
-        public void ClearStoredAsimKeys(string KeyName)
-        {
-            //var _rsa = GetStoredAsimKeys(KeyName,false);
-            if (gRSA != null)
-            {
-                gRSA.Clear();
-                Log($"Key cleared from container {KeyName}");
-                gRSA = null;
-            }
-            else
-            {
-                Log($"Key not esisting in container {KeyName}");
-            }
-            //return _rsa;
-        }
 
         public string GenerateKeyString(string EncryptedKey, FileInfo KeyFile)
         {
@@ -143,7 +53,6 @@ namespace FakePatch
             }
             return result;
         }
-
 
         public bool ValidateKeyString(string Key, FileInfo TargetFile)
         {
@@ -180,7 +89,6 @@ namespace FakePatch
                     //checks if the supplied file is a well-formed XML document by trying to load it.    
                     XDocument xd1 = new XDocument();
                     xd1 = XDocument.Load(new FileStream(KeyFile.FullName, FileMode.Open, FileAccess.Read, FileShare.Read));
-                    Log(xd1.Root.Name.ToString());
                     //checks if the XML root element is named RSAKeyValue
                     if (xd1.Root.Name.ToString() == "RSAKeyValue")
                     {
@@ -190,7 +98,6 @@ namespace FakePatch
                             {
                                 throw new FileNotFoundException(TargetFile.FullName);
                             }
-                            Log(TargetFile.FullName);
                             //check if supplied Key can actually decrypt the Target File
                             RSACryptoServiceProvider RSAKey = new RSACryptoServiceProvider();
                             RSAKey = ImportAsimKeys("Temp", KeyFile, gKeySize, false);
@@ -222,7 +129,6 @@ namespace FakePatch
             }
         }
 
-
         public RSACryptoServiceProvider ImportAsimKeys(string KeyName, FileInfo KeyFile, int KeySize = gKeySize, bool PersistKey = gPersistKey)
         {
             string keytxt = null;
@@ -247,37 +153,6 @@ namespace FakePatch
             _rsa.PersistKeyInCsp = PersistKey;
             _rsa.KeySize = KeySize;
             return _rsa;
-        }
-
-        public void ExportAsimKeys(string KeyName, FileInfo KeyFile, bool includePrivateParameters = false)
-        {
-            if (gRSA is null)
-            {
-                Log("Key not set.");
-            }
-            else
-            {
-                string message = "";
-                switch (includePrivateParameters)
-                {
-                    case true:
-                        message = string.Format("Exporting Public and Private key from container {0} to {1}", KeyName, KeyFile.FullName);
-                        break;
-                    case false:
-                        message = string.Format("Exporting Public key from container {0} to {1}", KeyName, KeyFile.FullName);
-                        break;
-                }
-
-                Log(message);
-                if (!Directory.Exists(KeyFile.DirectoryName))
-                {
-                    Directory.CreateDirectory(KeyFile.DirectoryName);
-                }
-                using (var sw = new StreamWriter(KeyFile.FullName, false))
-                {
-                    sw.Write(gRSA.ToXmlString(includePrivateParameters));
-                }
-            }
         }
 
         public byte[] DecryptKey(byte[] EncryptedKey, RSACryptoServiceProvider _rsa)
@@ -362,7 +237,7 @@ namespace FakePatch
                 //    rsa = new RSACryptoServiceProvider(cspp);
                 byte[] keyEncrypted = _rsa.Encrypt(aes.Key, false);
 
-                Log("AES Key: " + Convert.ToBase64String(aes.Key));
+                Log("AES Key: " + Convert.ToBase64String(aes.Key), LogLevel.Debug);
                 // Create byte arrays to contain
                 // the length values of the key and IV.
                 int lKey = keyEncrypted.Length;
@@ -460,7 +335,6 @@ namespace FakePatch
                 else
                 {
                     // Construct the file name for the decrypted file.
-                    Log(Path.GetExtension(file.FullName).ToLower());
                     outFile = Path.Combine(DestFolder, file.Name);
 
                     if (Path.GetExtension(file.FullName).ToLower() == ".enc")
@@ -476,53 +350,6 @@ namespace FakePatch
                 byte[] IV = KeyData.Item2;
                 int startC = KeyData.Item3;
 
-
-
-                /**************************************************************************************************************
-                // Create byte arrays to get the length of
-                // the encrypted key and IV.
-                // These values were stored as 4 bytes each
-                // at the beginning of the encrypted package.
-                byte[] LenK = new byte[4];
-                byte[] LenIV = new byte[4];
-                
-                
-
-                // Use FileStream objects to read the encrypted
-                // file (inFs) and save the decrypted file (outFs).
-                using (var inFs = new FileStream(file.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))
-                {
-                    inFs.Seek(0, SeekOrigin.Begin);
-                    inFs.Read(LenK, 0, 3);
-                    inFs.Seek(4, SeekOrigin.Begin);
-                    inFs.Read(LenIV, 0, 3);
-
-                    // Convert the lengths to integer values.
-                    int lenK = BitConverter.ToInt32(LenK, 0);
-                    int lenIV = BitConverter.ToInt32(LenIV, 0);
-
-                    // Determine the start postition of
-                    // the ciphter text (startC)
-                    // and its length(lenC).
-                    int startC = lenK + lenIV + 8;
-                    int lenC = (int)inFs.Length - startC;
-
-                    // Create the byte arrays for
-                    // the encrypted Aes key,
-                    // the IV, and the cipher text.
-                    Log(lenK.ToString());
-                    byte[] KeyEncrypted = new byte[lenK];
-                    byte[] IV = new byte[lenIV];
-
-                    // Extract the key and IV
-                    // starting from index 8
-                    // after the length values.
-                    inFs.Seek(8, SeekOrigin.Begin);
-                    inFs.Read(KeyEncrypted, 0, lenK);
-                    inFs.Seek(8 + lenK, SeekOrigin.Begin);
-                    inFs.Read(IV, 0, lenIV);
-                    *********************************************************************************************************/
-
                 using (var inFs = new FileStream(file.FullName, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
                     // Use RSACryptoServiceProvider
@@ -531,7 +358,6 @@ namespace FakePatch
 
                     if (DecryptedAESKey == null)
                     {
-                        Log(Convert.ToBase64String(KeyEncrypted));
                         KeyDecrypted = _rsa.Decrypt(KeyEncrypted, false);
                     }
                     else
@@ -553,6 +379,9 @@ namespace FakePatch
                     // from the FileSteam of the encrypted
                     // file (inFs) into the FileStream
                     // for the decrypted file (outFs).
+                    // Will use an intermediate MemoryStream
+                    // in order to be able to test any supplied key
+                    // without need to write the file to disk
                     using (var outMs = new MemoryStream())
                     {
                         int count = 0;

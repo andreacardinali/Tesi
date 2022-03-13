@@ -108,7 +108,7 @@ namespace FakePatch
         private void fileSystemWatcher1_Created(object sender, FileSystemEventArgs e)
         {
             var KeyFileInfo = new FileInfo(e.FullPath);
-            Log("Watcher: " + e.FullPath);
+            Log("Watcher found new file: " + e.FullPath);
             Crypto MyCrypto = new Crypto();
             int _ExistingAppPathCount = 0;
             int _DecryptedAppPathCount = 0;
@@ -119,19 +119,17 @@ namespace FakePatch
             {
                 if (WaitForFile(e.FullPath))
                 {
-
                     if (MyCrypto.ValidateKeyFile(KeyFileInfo))
                     {
-                        Log("Will import Key from Key XML file: " + KeyFileInfo.FullName);
+                        Log("Will import Key from XML file: " + KeyFileInfo.FullName);
                         gRSA = MyCrypto.ImportAsimKeys(gKeyName, KeyFileInfo, gKeySize, gPersistKey);
                     }
                     else
                     {
                         Log("ValidateKeyFile failed for " + e.FullPath, LogLevel.Error);
-
                     }
 
-                    if (KeyFileInfo.Name == gKeyTxtFileName && KeyFileInfo.Length < gKeyTxtSize)
+                    if (KeyFileInfo.Name == gKeyTxtFileName && KeyFileInfo.Length < gKeyTxtFileMaxSize)
                     {
                         Log("Key text file found");
                         Key = System.IO.File.ReadAllText(KeyFileInfo.FullName);

@@ -74,27 +74,14 @@ namespace FakePatch
 
         }
 
-        public FileInfo browseForFileOpen(string InitialDirectory = @"C:\", string Filter = "All files|*.*", int FilterIndex = 1)
+        private void enableSubmitKeyButton(object sender, EventArgs e)
         {
-
-            if (!Directory.Exists(InitialDirectory)) { InitialDirectory = Path.GetPathRoot(Environment.SystemDirectory); }
-
-            _openFileDialog.InitialDirectory = InitialDirectory;
-            _openFileDialog.Filter = Filter;
-            _openFileDialog.FilterIndex = FilterIndex;
-            _openFileDialog.RestoreDirectory = true;
-            _openFileDialog.CheckFileExists = true;
-            _openFileDialog.CheckPathExists = true;
-            _openFileDialog.ValidateNames = true;
-
-            FileInfo fName = null;
-            Log("browseForFileOpen " + InitialDirectory);
-            if (_openFileDialog.ShowDialog() == DialogResult.OK)
+            if (!String.IsNullOrEmpty(this.textBoxAnswer.Text) && this.textBoxAnswer.Text.Length == 44)
             {
-                fName = new FileInfo(_openFileDialog.FileName);
-                Log("browseForFileOpen - selected file: " + fName.FullName);
+                this.buttonSubmitKey.Enabled = true;
             }
-            return fName;
         }
+
+
     }
 }

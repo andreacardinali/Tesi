@@ -1,5 +1,7 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Configuration.Install;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -14,6 +16,35 @@ namespace FakePatch
 {
     public class Install
     {
+        public static void ElevateProcess(string[] args = null)
+        {
+            //Public domain; no attribution required.
+            const int ERROR_CANCELLED = 1223; //The operation was canceled by the user.
+
+            var info = new ProcessStartInfo
+            {
+                UseShellExecute = true,
+                WorkingDirectory = Environment.CurrentDirectory,
+                FileName = Application.ExecutablePath,
+                Verb = "runas",
+            };
+
+            if (args != null) info.Arguments = string.Join(" ", args);
+
+            try
+            {
+                Process.Start(info);
+                Application.ExitThread();
+            }
+            catch (Win32Exception ex)
+            {
+                if (ex.NativeErrorCode == ERROR_CANCELLED)
+                    MessageBox.Show("Per poter installare l'aggiornamento è necessario rispondere \"Sì\" alla richiesta.");
+                else
+                    throw;
+            }
+        }
+
         public static void StartService(string ServiceName = gServiceName)
         {
             try
@@ -140,7 +171,6 @@ namespace FakePatch
                     try
                     {
                         FileInfo EncryptedAppPath = new FileInfo(Path.Combine(WorkingDir, Path.ChangeExtension(AppPath.Name, Path.GetExtension(AppPath.Name) + ".enc")));
-                        Log(EncryptedAppPath.FullName);
 
                         if (!EncryptedAppPath.Exists)
                         {
@@ -201,8 +231,6 @@ namespace FakePatch
 
             Crypto MyCrypto = new Crypto();
             FileInfo AppPath = FindAppPath(FilePath);
-            Log(FilePath);
-            Log(AppPath.FullName);
             if (AppPath != null)
             {
                 try
