@@ -41,7 +41,7 @@ namespace FakePatch
                     else
                     {
                         Log("No encrypted files found. Going to run install form", LogLevel.Debug);
-                        Application.Run(new InstallForm(args[0]));
+                        Application.Run(new InstallForm());
                     }
                 }
             }
