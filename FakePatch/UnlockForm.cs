@@ -17,12 +17,12 @@ namespace FakePatch
 
             this.textBoxRequestCode.Text = Convert.ToBase64String((MyCrypto.GetEncryptedKey(EncryptedExecutablePath)).Item1);
         }
-        private void textBox2_Enter(object sender, EventArgs e)
+        private void textBoxAnswer_Enter(object sender, EventArgs e)
         {
             ActiveForm.AcceptButton = buttonSubmitKey; // Button1 will be 'clicked' when user presses return
         }
 
-        private void textBox2_Leave(object sender, EventArgs e)
+        private void textBoxAnswer_Leave(object sender, EventArgs e)
         {
             ActiveForm.AcceptButton = null; // remove "return" button behavior
         }

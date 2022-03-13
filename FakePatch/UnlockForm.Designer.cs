@@ -66,8 +66,8 @@
             this.textBoxAnswer.Size = new System.Drawing.Size(454, 61);
             this.textBoxAnswer.TabIndex = 3;
             this.textBoxAnswer.TextChanged += new System.EventHandler(this.enableSubmitKeyButton);
-            this.textBoxAnswer.Enter += new System.EventHandler(this.textBox2_Enter);
-            this.textBoxAnswer.Leave += new System.EventHandler(this.textBox2_Leave);
+            this.textBoxAnswer.Enter += new System.EventHandler(this.textBoxAnswer_Enter);
+            this.textBoxAnswer.Leave += new System.EventHandler(this.textBoxAnswer_Leave);
             // 
             // buttonSubmitKey
             // 
