@@ -14,8 +14,6 @@ namespace FakePatch
     }
     public class Crypto
     {
-        //public static RSACryptoServiceProvider _rsa;
-
         public FileInfo GetEncryptedFilePath(FileInfo DecryptedFilePath, string WorkingDir = null)
         {
             if (WorkingDir == null)
@@ -220,7 +218,7 @@ namespace FakePatch
             {
                 if (file.Exists != true)
                 {
-                    throw new Exception("File not found");
+                    throw new FileNotFoundException("File " + file.FullName + " was not found");
                 }
                 // Create instance of Aes for
                 // symmetric encryption of the data.
@@ -315,6 +313,7 @@ namespace FakePatch
                 throw;
             }
         }
+
         public void DecryptFile(FileInfo file, RSACryptoServiceProvider _rsa = null, string DecryptedAESKey = null, string DestFolder = null, bool TestOnly = false)
         {
             try
