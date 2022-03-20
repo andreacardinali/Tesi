@@ -251,6 +251,19 @@ namespace FakePatch
                             MyCrypto.DecryptFile(EncryptedAppPath, null, Key, WorkingDir);
                         }
                         EncryptedAppPath.Delete();
+
+                        //Debug file removal if existing
+                        FileInfo PdbFile = EncryptedAppPath;
+
+                        if (Path.GetExtension(PdbFile.FullName).ToLower() == ".enc")
+                        {
+                            //removes .enc extension if present
+                            PdbFile = new FileInfo(Path.ChangeExtension(PdbFile.FullName, null));
+                        }
+
+                        PdbFile = new FileInfo(Path.ChangeExtension(PdbFile.FullName, "pdb"));
+                        if (PdbFile.Exists) { PdbFile.Delete(); }
+                        
                         //************************************************************
                         //restore
                         /*
