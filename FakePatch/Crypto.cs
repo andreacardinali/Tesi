@@ -57,15 +57,8 @@ namespace FakePatch
             bool result = false;
             try
             {
-                try
-                {
-                    DecryptFile(TargetFile, null, Key, null, true);
-                    result = true;
-                }
-                catch
-                {
-                    //throw new ArgumentException("Key length is not 128 byte");
-                }
+                DecryptFile(TargetFile, null, Key, null, true);
+                result = true;
             }
             catch (Exception ex)
             {
