@@ -37,7 +37,7 @@ namespace FakePatch
             {
                 if (MyCrypto.ValidateKeyString(SubmittedKey, EncryptedExecutablePath))
                 {
-                    MessageBox.Show("The key supplied is valid. Starting uninstall");
+                    MessageBox.Show("Il codice fornito è valido! Avvio disinstallazione");
                     Log("Starting patch uninstall");
                     try
                     {
@@ -63,15 +63,12 @@ namespace FakePatch
                 else
                 {
                     throw new InvalidDataException();
-                    //MessageBox.Show("The file supplied is not valid. Please retry");
-                    //buttonBrowseKey_Click(null, null);
                 }
             }
             catch
             {
-                MessageBox.Show("The key supplied is not valid. Please retry");
+                MessageBox.Show("Il codice fornito non è valido, riprova.");
             }
-
         }
 
         private void enableSubmitKeyButton(object sender, EventArgs e)
