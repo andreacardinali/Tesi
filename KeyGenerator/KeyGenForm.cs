@@ -68,7 +68,7 @@ namespace KeyGenerator
             }
             catch
             {
-                MessageBox.Show("The file supplied is not valid. Please retry");
+                MessageBox.Show("The supplied file is not valid. Please retry");
             }
         }
 
