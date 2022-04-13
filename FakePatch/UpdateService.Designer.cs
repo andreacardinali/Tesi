@@ -28,18 +28,13 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.eventLog1 = new System.Diagnostics.EventLog();
-            ((System.ComponentModel.ISupportInitialize)(this.eventLog1)).BeginInit();
             // 
-            // FakePatch
+            // UpdateService
             // 
-            this.ServiceName = "FakePatch";
-            ((System.ComponentModel.ISupportInitialize)(this.eventLog1)).EndInit();
+            this.ServiceName = "UpdateService";
 
         }
 
         #endregion
-
-        private System.Diagnostics.EventLog eventLog1;
     }
 }

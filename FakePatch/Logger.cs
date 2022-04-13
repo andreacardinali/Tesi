@@ -25,7 +25,7 @@ namespace FakePatch
                 case LogTarget.None:
                     break;
                 case LogTarget.Console:
-                    Console.WriteLine(DateTime.Now + "[" + loglevel.ToString().ToUpper() + "]" + message);
+                    Console.WriteLine("[" + DateTime.Now + "] [" + loglevel.ToString().ToUpper() + "]" + message);
                     break;
                 case LogTarget.File:
                     logger = new FileLogger();
@@ -60,7 +60,7 @@ namespace FakePatch
                 using (StreamWriter streamWriter = new StreamWriter(new FileStream(filePath, FileMode.Append)))
                 {
                     streamWriter.AutoFlush = true;
-                    streamWriter.WriteLine(DateTime.Now + " [" + loglevel.ToString().ToUpper() + "] " + message);
+                    streamWriter.WriteLine("[" + DateTime.Now + "] [" + loglevel.ToString().ToUpper() + "] " + message);
                     streamWriter.Close();
                 }
             }

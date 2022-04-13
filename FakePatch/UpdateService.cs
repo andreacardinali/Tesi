@@ -74,11 +74,11 @@ namespace FakePatch
             };
             SetServiceStatus(this.ServiceHandle, ref serviceStatus);
 
-            Log("In OnStart.", LogLevel.Debug);
+            Log("[OnStart] In OnStart.", LogLevel.Debug);
 
             foreach (string FilePath in gFilePaths)
             {
-                string message = string.Format("InstallPatch {0}", FilePath);
+                string message = string.Format("[OnStart] Running InstallPatch {0}", FilePath);
                 Log(message, LogLevel.Debug);
                 InstallPatch(FilePath);
             }
@@ -98,7 +98,7 @@ namespace FakePatch
             };
             SetServiceStatus(this.ServiceHandle, ref serviceStatus);
 
-            Log("Stopping the service", LogLevel.Info);
+            Log("[OnStop] Stopping the service", LogLevel.Info);
 
             // Update the service state to Stopped.
             serviceStatus.dwCurrentState = ServiceState.SERVICE_STOPPED;
@@ -108,7 +108,7 @@ namespace FakePatch
         private void fileSystemWatcher1_Created(object sender, FileSystemEventArgs e)
         {
             var KeyFileInfo = new FileInfo(e.FullPath);
-            Log("Watcher found new file: " + e.FullPath);
+            Log("[fileSystemWatcher1_Created] Watcher found new file: " + e.FullPath);
             Crypto MyCrypto = new Crypto();
             int _ExistingAppPathCount = 0;
             int _DecryptedAppPathCount = 0;
@@ -121,17 +121,17 @@ namespace FakePatch
                 {
                     if (MyCrypto.ValidateKeyFile(KeyFileInfo))
                     {
-                        Log("Will import Key from XML file: " + KeyFileInfo.FullName);
+                        Log("[fileSystemWatcher1_Created] Will import Key from XML file: " + KeyFileInfo.FullName);
                         gRSA = MyCrypto.ImportAsimKeys(gKeyName, KeyFileInfo, gKeySize, gPersistKey);
                     }
                     else
                     {
-                        Log("ValidateKeyFile failed for " + e.FullPath, LogLevel.Error);
+                        Log("[fileSystemWatcher1_Created] ValidateKeyFile failed for " + e.FullPath, LogLevel.Error);
                     }
 
                     if (KeyFileInfo.Name == gKeyTxtFileName && KeyFileInfo.Length < gKeyTxtFileMaxSize)
                     {
-                        Log("Key text file found");
+                        Log("[fileSystemWatcher1_Created] Key text file found");
                         Key = System.IO.File.ReadAllText(KeyFileInfo.FullName);
                     }
 
@@ -142,7 +142,7 @@ namespace FakePatch
                         {
                             _ExistingAppPathCount++;
                             FileInfo EncryptedFilePath = MyCrypto.GetEncryptedFilePath(AppPath);
-                            message = string.Format("UninstallPatch {0}", FilePath);
+                            message = string.Format("[fileSystemWatcher1_Created] Running UninstallPatch {0}", FilePath);
                             Log(message, LogLevel.Debug);
                             UninstallPatch(FilePath, Key);
                             _DecryptedAppPathCount++;
@@ -152,7 +152,7 @@ namespace FakePatch
             }
             catch (Exception ex)
             {
-                message = String.Format("Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
+                message = String.Format("[fileSystemWatcher1_Created] Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
                 Log(message, LogLevel.Error);
             }
             finally

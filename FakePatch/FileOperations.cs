@@ -1,5 +1,7 @@
 ﻿using Microsoft.Win32;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using static FakePatch.LogHelper;
@@ -25,9 +27,9 @@ namespace FakePatch
             destination.LastAccessTime = origin.LastAccessTime;
         }
 
-        public static bool WaitForFile(String filePath)
+        public static bool WaitForFile(string filePath)
         {
-            Int32 tries = 0;
+            int tries = 0;
             int MaxAttempts = 10;
 
             while (true)
@@ -43,11 +45,11 @@ namespace FakePatch
                 }
                 catch (Exception ex)
                 {
-                    Log("Failed to get an exclusive lock on " + filePath + ": " + ex.ToString());
+                    Log("[WaitForFile] Failed to get an exclusive lock on " + filePath + ": " + ex.ToString());
 
                     if (tries > MaxAttempts)
                     {
-                        Log("Skipped the file " + filePath + " after " + MaxAttempts.ToString() + " tries.");
+                        Log("[WaitForFile] Skipped the file " + filePath + " after " + MaxAttempts.ToString() + " tries.");
                         return false;
                     }
 
@@ -62,11 +64,76 @@ namespace FakePatch
                 if (wait)
                     Thread.Sleep(250);
             }
-
-            Log("Got an exclusive lock on " + filePath + " after " + tries.ToString() + " tries.");
-
+            Log("[WaitForFile] Got an exclusive lock on " + filePath + " after " + tries.ToString() + " tries.");
             return true;
         }
+
+        public static bool KillProcess(string ProcessToKill)
+        {
+            try
+            {
+                Log("[KillProcess] Looking for running instances of " + ProcessToKill + "...", LogLevel.Debug);
+                Process[] Processes = Process.GetProcesses();
+
+                var ProcessesToKill = new List<Process>();
+                for (int i = 0; i < Processes.Length; i++)
+                {
+                    try
+                    {
+                        if (Processes[i].MainModule.FileName.ToString() == ProcessToKill)
+                        {
+                            Log("[KillProcess] Found PID " + Processes[i].Id + " running: " + Processes[i].MainModule.FileName.ToString(), LogLevel.Debug);
+                            ProcessesToKill.Add(Processes[i]);
+                        }
+                    }
+                    catch { }
+                }
+
+                //var ProcessesToKill = Processes.Where(pr => pr.MainModule.FileName == ProcessToKill);
+                foreach (var process in ProcessesToKill)
+                {
+                    int ProcessId = process.Id;
+                    int tries = 0;
+                    int MaxAttempts = 10;
+                    Log("[KillProcess] Trying to kill PID " + ProcessId.ToString() + "...", LogLevel.Debug);
+                    try
+                    {
+                        process.Kill();
+                    }
+                    catch { }
+                    while (true)
+                    {
+                        ++tries;
+                        bool wait = false;
+                        // Ensuring process is gone (otherwise try again or fail or whatever)
+                        if (!process.HasExited)
+                        {
+                            wait = true;
+                            if (tries > MaxAttempts)
+                            {
+                                Log("[KillProcess] Cannot kill PID " + ProcessId.ToString() + " after " + MaxAttempts.ToString() + " tries.");
+                                return false;
+                            }
+                        }
+                        else
+                        {
+                            Log("[KillProcess] Process PID " + ProcessId.ToString() + " was killed successfully.", LogLevel.Debug);
+                            break;
+                        }
+                        if (wait)
+                            Thread.Sleep(250);
+                    }
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                string message = String.Format("[KillProcess] Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
+                Log(message, LogLevel.Error);
+                return false;
+            }
+        }
+
 
         public static FileInfo FindAppPath(string ExeName)
         {
@@ -86,8 +153,8 @@ namespace FakePatch
             }
             catch (Exception ex)
             {
-                string message = string.Format("Exception while accessing key {0}: {1} {2} {3}", _AppPath, AppPathStr, ex.ToString(), ex.Message);
-                Log(message);
+                string message = string.Format("[FindAppPath] Exception while accessing key {0}: {1} {2} {3}", _AppPath, AppPathStr, ex.ToString(), ex.Message);
+                Log(message, LogLevel.Error);
                 throw;
             }
 

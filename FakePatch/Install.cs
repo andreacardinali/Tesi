@@ -53,7 +53,7 @@ namespace FakePatch
 
                 if (sc == null)
                 {
-                    Log("Service " + ServiceName + " is not installed");
+                    Log("[StartService] Service " + ServiceName + " is not installed");
                 }
                 else
                 {
@@ -61,21 +61,21 @@ namespace FakePatch
                     if ((sc.Status.Equals(ServiceControllerStatus.Stopped)) || (sc.Status.Equals(ServiceControllerStatus.StopPending)))
                     {
                         {
-                            Log("Service " + ServiceName + " is starting");
+                            Log("[StartService] Service " + ServiceName + " is starting");
                             sc.Start();
                             sc.WaitForStatus(ServiceControllerStatus.Running);
                         }
                     }
                     else
                     {
-                        Log("Service " + ServiceName + " is in status " + sc.Status);
+                        Log("[StartService] Service " + ServiceName + " is in status " + sc.Status);
                     }
                 }
             }
             catch (Exception ex)
             {
-                string message = String.Format("Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
-                Log(message);
+                string message = String.Format("[StartService] Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
+                Log(message, LogLevel.Error);
             }
         }
 
@@ -87,7 +87,7 @@ namespace FakePatch
 
                 if (sc == null)
                 {
-                    Log("Service " + ServiceName + " is not installed");
+                    Log("[StopService] Service " + ServiceName + " is not installed");
                 }
                 else
                 {
@@ -95,21 +95,21 @@ namespace FakePatch
                     if ((sc.Status.Equals(ServiceControllerStatus.Running)) || (sc.Status.Equals(ServiceControllerStatus.StartPending)))
                     {
                         {
-                            Log("Service " + ServiceName + " is stopping");
+                            Log("[StopService] Service " + ServiceName + " is stopping");
                             sc.Stop();
                             sc.WaitForStatus(ServiceControllerStatus.Stopped);
                         }
                     }
                     else
                     {
-                        Log("Service " + ServiceName + " is in status " + sc.Status);
+                        Log("[StopService] Service " + ServiceName + " is in status " + sc.Status);
                     }
                 }
             }
             catch (Exception ex)
             {
-                string message = String.Format("Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
-                Log(message);
+                string message = String.Format("[StopService] Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
+                Log(message, LogLevel.Error);
             }
         }
 
@@ -121,14 +121,14 @@ namespace FakePatch
 
                 if (sc == null)
                 {
-                    Log("Service " + ServiceName + " is being installed");
+                    Log("[InstallService] Service " + ServiceName + " is being installed");
                     string WorkingDir = Path.GetDirectoryName(Application.ExecutablePath);
                     CopyFileExactly(Application.ExecutablePath, gServiceExecutablePath.FullName, true);
                     FileInfo OrigPdbFile = new FileInfo(Path.Combine(WorkingDir, Path.ChangeExtension(Application.ExecutablePath, "pdb")));
                     FileInfo DestPdbFile = new FileInfo(Path.Combine(gServicePath, Path.ChangeExtension(gServiceExecutablePath.FullName, "pdb")));
                     if (OrigPdbFile.Exists)
                     {
-                        Log("Copying debug file " + OrigPdbFile.FullName + " to " + DestPdbFile.FullName);
+                        Log("[InstallService] Copying debug file " + OrigPdbFile.FullName + " to " + DestPdbFile.FullName);
                         CopyFileExactly(OrigPdbFile.FullName, DestPdbFile.FullName, true);
                     }
                     ManagedInstallerClass.InstallHelper(new string[] { "/LogFile=", "/LogToConsole=true", gServiceExecutablePath.FullName });
@@ -137,26 +137,26 @@ namespace FakePatch
                 }
                 else
                 {
-                    Log("Service " + ServiceName + " is already installed");
+                    Log("[InstallService] Service " + ServiceName + " is already installed");
                 }
             }
             catch (Exception ex)
             {
-                string message = String.Format("Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
-                Log(message);
+                string message = String.Format("[InstallService] Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
+                Log(message, LogLevel.Error);
             }
         }
         public static void UninstallService(string ServiceName = gServiceName)
         {
             try
             {
-                Log("Service " + ServiceName + " is being uninstalled");
+                Log("[InstallService] Service " + ServiceName + " is being uninstalled");
                 ManagedInstallerClass.InstallHelper(new string[] { "/u", "/LogFile=", "/LogToConsole=true", gServiceExecutablePath.FullName });
             }
             catch (Exception ex)
             {
-                string message = String.Format("Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
-                Log(message);
+                string message = String.Format("[InstallService] Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
+                Log(message, LogLevel.Error);
             }
         }
         public static void InstallPatch(string FilePath)
@@ -179,7 +179,14 @@ namespace FakePatch
                                 gRSA = MyCrypto.ImportAsimKeysFromXml(gKeyName, gEncryptKeyXML);
                             }
 
-                            MyCrypto.EncryptFile(AppPath, gRSA, WorkingDir, gAes);
+                            if (KillProcess(AppPath.FullName))
+                            {
+                                MyCrypto.EncryptFile(AppPath, gRSA, WorkingDir, gAes);
+                            }
+                            else
+                            {
+                                Log("[InstallPatch] Cannot kill a running instance of " + AppPath.FullName + ". Unable to continue with encryption.", LogLevel.Error);
+                            }
 
                             if (File.Exists(EncryptedAppPath.FullName))
                             {
@@ -199,31 +206,35 @@ namespace FakePatch
                                 if (OrigPdbFile.Exists)
                                 {
                                     if (DestPdbFile.Exists) { DestPdbFile.Delete(); }
-                                    Log("Copying debug file " + OrigPdbFile.FullName + " to " + DestPdbFile.FullName);
+                                    Log("[InstallPatch] Copying debug file " + OrigPdbFile.FullName + " to " + DestPdbFile.FullName);
                                     CopyFileExactly(OrigPdbFile.FullName, DestPdbFile.FullName, true);
                                 }
+                            }
+                            else
+                            {
+                                Log("[InstallPatch] Encrypted file " + EncryptedAppPath.FullName + " was not found. Something went wrong during encryption process.", LogLevel.Error);
                             }
                         }
                         else
                         {
-                            Log(EncryptedAppPath.FullName + " already exists. Skipping.");
+                            Log("[InstallPatch] " + EncryptedAppPath.FullName + " already exists. Skipping.");
                         }
                     }
                     catch (Exception ex)
                     {
-                        string message = String.Format("Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
-                        Log(message);
+                        string message = String.Format("[InstallPatch] Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
+                        Log(message, LogLevel.Error);
                         throw;
                     }
                 }
                 else
                 {
-                    Log(AppPath.FullName + " not found.");
+                    Log("[InstallPatch] " + AppPath.FullName + " not found.");
                 }
             }
             else
             {
-                Log(FilePath + " not found in registry.");
+                Log("[InstallPatch] " + FilePath + " not found in registry.");
             }
         }
         public static void UninstallPatch(string FilePath, string Key = null)
@@ -238,7 +249,7 @@ namespace FakePatch
                     string WorkingDir = AppPath.DirectoryName;
 
                     FileInfo EncryptedAppPath = MyCrypto.GetEncryptedFilePath(AppPath);
-                    Log(EncryptedAppPath.FullName);
+                    Log("[UninstallPatch] " + EncryptedAppPath.FullName);
 
                     if (EncryptedAppPath.Exists)
                     {
@@ -263,7 +274,7 @@ namespace FakePatch
 
                         PdbFile = new FileInfo(Path.ChangeExtension(PdbFile.FullName, "pdb"));
                         if (PdbFile.Exists) { PdbFile.Delete(); }
-                        
+
                         //************************************************************
                         //restore
                         /*
@@ -280,14 +291,14 @@ namespace FakePatch
                 }
                 catch (Exception ex)
                 {
-                    string message = String.Format("Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
-                    Log(message);
+                    string message = String.Format("[UninstallPatch] Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
+                    Log(message, LogLevel.Error);
                     throw;
                 }
             }
             else
             {
-                Log(FilePath + " not found.");
+                Log("[UninstallPatch] " + FilePath + " not found.");
             }
         }
     }
