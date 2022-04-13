@@ -27,11 +27,11 @@ namespace KeyGenerator
             _openFileDialog.ValidateNames = true;
 
             FileInfo fName = null;
-            Log("browseForFileOpen " + InitialDirectory);
+            Log("[browseForFileOpen] Initial directory: " + InitialDirectory, LogLevel.Debug);
             if (_openFileDialog.ShowDialog() == DialogResult.OK)
             {
                 fName = new FileInfo(_openFileDialog.FileName);
-                Log("browseForFileOpen - selected file: " + fName.FullName);
+                Log("[browseForFileOpen] Selected file: " + fName.FullName, LogLevel.Debug);
             }
             return fName;
         }
