@@ -248,7 +248,6 @@ namespace FakePatch
 
                 // Adds ".enc" to the file's extension
                 string outFile = GetEncryptedFilePath(file, DestFolder).FullName;
-                //string outFile = Path.Combine(DestFolder, Path.ChangeExtension(file.Name, Path.GetExtension(file.Name) + ".enc"));
 
                 Log("[EncryptFile] Encrypting " + file.FullName + " to " + outFile);
 
