@@ -21,7 +21,7 @@ namespace FakePatch
                 WorkingDir = DecryptedFilePath.DirectoryName;
             }
             FileInfo EncryptedFilePath = new FileInfo(Path.Combine(WorkingDir, Path.ChangeExtension(DecryptedFilePath.Name, Path.GetExtension(DecryptedFilePath.Name) + ".enc")));
-            Log("[GetEncryptedFilePath] Decrypted path: " + DecryptedFilePath.FullName + " - Encrypted path: " + EncryptedFilePath.FullName);
+            Log("Decrypted path: " + DecryptedFilePath.FullName + " - Encrypted path: " + EncryptedFilePath.FullName);
             return EncryptedFilePath;
         }
 
@@ -45,7 +45,7 @@ namespace FakePatch
             }
             catch (Exception ex)
             {
-                string message = String.Format("[GenerateKeyString] Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
+                string message = String.Format("Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
                 Log(message, LogLevel.Error);
                 result = null;
             }
@@ -54,7 +54,7 @@ namespace FakePatch
 
         public bool ValidateKeyString(string Key, FileInfo TargetFile)
         {
-            bool result;
+            bool result = false;
             try
             {
                 DecryptFile(TargetFile, null, Key, null, true);
@@ -62,7 +62,7 @@ namespace FakePatch
             }
             catch (Exception ex)
             {
-                string message = String.Format("[ValidateKeyString] Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
+                string message = String.Format("Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
                 Log(message, LogLevel.Error);
                 result = false;
             }
@@ -99,8 +99,8 @@ namespace FakePatch
                             }
                             catch (Exception ex)
                             {
-                                string message = String.Format("[ValidateKeyFile] Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
-                                Log(message, LogLevel.Error);
+                                string message = String.Format("Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
+                                Log(message);
                                 result = false;
                             }
                         }
@@ -114,7 +114,7 @@ namespace FakePatch
             }
             catch (Exception ex)
             {
-                string message = String.Format("[ValidateKeyFile] Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
+                string message = String.Format("Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
                 Log(message, LogLevel.Error);
                 return result;
             }
@@ -127,7 +127,7 @@ namespace FakePatch
             {
                 keytxt = sr.ReadToEnd();
             }
-            Log("[ImportAsimKeys] Read key from file " + KeyFile.FullName + ": " + keytxt);
+            Log(keytxt);
             RSACryptoServiceProvider _rsa = ImportAsimKeysFromXml(KeyName, keytxt, KeySize, PersistKey);
             return _rsa;
         }
@@ -155,7 +155,7 @@ namespace FakePatch
             }
             catch (Exception ex)
             {
-                string message = String.Format("[DecryptKey] Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
+                string message = String.Format("Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
                 Log(message, LogLevel.Error);
                 throw;
             }
@@ -228,7 +228,7 @@ namespace FakePatch
                 //    rsa = new RSACryptoServiceProvider(cspp);
                 byte[] keyEncrypted = _rsa.Encrypt(aes.Key, false);
 
-                Log("[EncryptFile] AES Key: " + Convert.ToBase64String(aes.Key), LogLevel.Debug);
+                Log("AES Key: " + Convert.ToBase64String(aes.Key), LogLevel.Debug);
                 // Create byte arrays to contain
                 // the length values of the key and IV.
                 int lKey = keyEncrypted.Length;
@@ -249,7 +249,7 @@ namespace FakePatch
                 // Adds ".enc" to the file's extension
                 string outFile = GetEncryptedFilePath(file, DestFolder).FullName;
 
-                Log("[EncryptFile] Encrypting " + file.FullName + " to " + outFile);
+                Log("Encrypting " + file.FullName + " to " + outFile);
 
                 using (var outFs = new FileStream(outFile, FileMode.Create))
                 {
@@ -300,7 +300,7 @@ namespace FakePatch
             }
             catch (Exception ex)
             {
-                string message = String.Format("[EncryptFile] Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
+                string message = String.Format("Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
                 Log(message, LogLevel.Error);
                 throw;
             }
@@ -334,7 +334,7 @@ namespace FakePatch
                         outFile = Path.ChangeExtension(outFile, null);
                     }
                 }
-                Log("[DecryptFile] Trying to decrypt " + file.FullName);
+                Log("Trying to decrypt " + file.FullName);
 
                 var KeyData = GetEncryptedKey(file);
                 byte[] KeyEncrypted = KeyData.Item1;
@@ -364,7 +364,7 @@ namespace FakePatch
                     // Decrypt the key.
                     ICryptoTransform transform = aes.CreateDecryptor(KeyDecrypted, IV);
 
-                    Log("[DecryptFile] Beginning Decryption with supplied key...");
+                    Log("Beginning Decryption with supplied key...");
 
                     // Decrypt the cipher text from
                     // from the FileSteam of the encrypted
@@ -399,7 +399,7 @@ namespace FakePatch
                             } while (count > 0);
 
                             outStreamDecrypted.FlushFinalBlock();
-                            Log("[DecryptFile] Decryption in memory was successful.");
+                            Log("Decryption in memory was successful.");
 
                             if (!TestOnly)
                             {
@@ -408,7 +408,7 @@ namespace FakePatch
                                     using (var outFs = new FileStream(outFile, FileMode.Create))
                                     {
                                         //writes the file
-                                        Log("[DecryptFile] Writing to " + outFile);
+                                        Log("Writing to " + outFile);
 
                                         Directory.CreateDirectory(DestFolder);
                                         outMs.Seek(0, SeekOrigin.Begin);
@@ -433,7 +433,7 @@ namespace FakePatch
             }
             catch (Exception ex)
             {
-                string message = String.Format("[DecryptFile] Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
+                string message = String.Format("Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
                 Log(message, LogLevel.Error);
                 throw;
             }

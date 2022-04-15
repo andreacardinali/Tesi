@@ -31,7 +31,7 @@ namespace FakePatch
             }
             else
             {
-                Log("[buttonStartInstall_Click] Starting patch install");
+                Log("Starting patch install");
                 progressBarInstall.Show();
                 backgroundWorker1.RunWorkerAsync();
             }
@@ -39,7 +39,7 @@ namespace FakePatch
 
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
-            Log("[backgroundWorker1_DoWork] backgroundWorker1_DoWork called");
+            Log("backgroundWorker1_DoWork called");
             buttonStartInstall.Enabled = false;
             backgroundWorker1.ReportProgress(0);
 
@@ -61,8 +61,8 @@ namespace FakePatch
             {
                 a++;
                 int i = Convert.ToInt32((float)a / b * 80);
-                string message = string.Format("[backgroundWorker1_DoWork] {0}%: running InstallPatch {1}", i, FilePath);
-                Log(message, LogLevel.Debug);
+                string message = string.Format("{0}%: InstallPatch {1}", i, FilePath);
+                Log(message);
                 InstallPatch(FilePath);
                 backgroundWorker1.ReportProgress(20 + i);
                 Thread.Sleep(500);

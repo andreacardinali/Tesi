@@ -30,7 +30,7 @@ namespace FakePatch
         private void buttonSubmitKey_Click(object sender, EventArgs e)
         {
             string SubmittedKey = this.textBoxAnswer.Text;
-            Log("[buttonSubmitKey_Click] Submitted key: " + SubmittedKey);
+            Log(SubmittedKey);
 
             Crypto MyCrypto = new Crypto();
             try
@@ -38,7 +38,7 @@ namespace FakePatch
                 if (MyCrypto.ValidateKeyString(SubmittedKey, EncryptedExecutablePath))
                 {
                     MessageBox.Show("Il codice fornito è valido! Avvio disinstallazione");
-                    Log("[buttonSubmitKey_Click] Supplied code is valid. Starting patch uninstall");
+                    Log("Starting patch uninstall");
                     try
                     {
                         FileInfo KeyFile = new FileInfo(Path.Combine(gKeyWatchPath, "key.txt"));
@@ -56,7 +56,7 @@ namespace FakePatch
                     }
                     catch (Exception ex)
                     {
-                        string message = String.Format("[buttonSubmitKey_Click] Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
+                        string message = String.Format("Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
                         Log(message, LogLevel.Error);
                     }
                 }
