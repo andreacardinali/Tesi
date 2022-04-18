@@ -221,7 +221,6 @@ namespace FakePatch
                 }
                 ICryptoTransform transform = aes.CreateEncryptor();
 
-
                 // Use RSACryptoServiceProvider to
                 // encrypt the AES key.
                 // rsa is previously instantiated:
