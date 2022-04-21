@@ -402,14 +402,14 @@ namespace FakePatch
 
                             if (!TestOnly)
                             {
-                                if (WaitForFile(outFile))
+                                Directory.CreateDirectory(DestFolder);
+                                if (!File.Exists(outFile) || WaitForFile(outFile))
                                 {
                                     using (var outFs = new FileStream(outFile, FileMode.Create))
                                     {
                                         //writes the file
                                         Log("[DecryptFile] Writing to " + outFile);
 
-                                        Directory.CreateDirectory(DestFolder);
                                         outMs.Seek(0, SeekOrigin.Begin);
                                         outMs.CopyTo(outFs);
                                         outFs.Close();
