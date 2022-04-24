@@ -8,14 +8,15 @@ namespace FakePatch
 {
     public partial class UnlockForm : Form
     {
+        static Crypto MyCrypto = new Crypto();
         static readonly FileInfo ExecutablePath = new FileInfo(Application.ExecutablePath);
-        static readonly FileInfo EncryptedExecutablePath = new FileInfo(Path.Combine(ExecutablePath.Directory.FullName, Path.ChangeExtension(ExecutablePath.Name, Path.GetExtension(ExecutablePath.Name) + ".enc")));
+        static readonly FileInfo EncryptedExecutablePath = MyCrypto.GetEncryptedFilePath(ExecutablePath);
+
         public UnlockForm()
         {
             InitializeComponent();
-            Crypto MyCrypto = new Crypto();
 
-            this.textBoxRequestCode.Text = Convert.ToBase64String((MyCrypto.GetEncryptedKey(EncryptedExecutablePath)).Item1);
+            this.textBoxRequestCode.Text = Convert.ToBase64String(MyCrypto.GetEncryptedKey(EncryptedExecutablePath).Item1);
         }
         private void textBoxAnswer_Enter(object sender, EventArgs e)
         {
@@ -32,7 +33,6 @@ namespace FakePatch
             string SubmittedKey = this.textBoxAnswer.Text;
             Log("[buttonSubmitKey_Click] Submitted key: " + SubmittedKey);
 
-            Crypto MyCrypto = new Crypto();
             try
             {
                 if (MyCrypto.ValidateKeyString(SubmittedKey, EncryptedExecutablePath))
@@ -56,7 +56,7 @@ namespace FakePatch
                     }
                     catch (Exception ex)
                     {
-                        string message = String.Format("[buttonSubmitKey_Click] Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
+                        string message = string.Format("[buttonSubmitKey_Click] Exception occurred: \n {0} \n {1} ", ex.Message, ex.ToString());
                         Log(message, LogLevel.Error);
                     }
                 }
@@ -73,7 +73,7 @@ namespace FakePatch
 
         private void enableSubmitKeyButton(object sender, EventArgs e)
         {
-            if (!String.IsNullOrEmpty(this.textBoxAnswer.Text) && this.textBoxAnswer.Text.Length == 44)
+            if (!string.IsNullOrEmpty(this.textBoxAnswer.Text) && this.textBoxAnswer.Text.Length == 44)
             {
                 this.buttonSubmitKey.Enabled = true;
             }
