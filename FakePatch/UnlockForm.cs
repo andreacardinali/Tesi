@@ -76,6 +76,9 @@ namespace FakePatch
             if (!string.IsNullOrEmpty(this.textBoxAnswer.Text) && this.textBoxAnswer.Text.Length == 44)
             {
                 this.buttonSubmitKey.Enabled = true;
+            } else
+            {
+                this.buttonSubmitKey.Enabled = false;
             }
         }
 

@@ -39,7 +39,7 @@ namespace FakePatch
             catch (Win32Exception ex)
             {
                 if (ex.NativeErrorCode == ERROR_CANCELLED)
-                    MessageBox.Show("Per poter installare l'aggiornamento è necessario rispondere \"Sì\" alla richiesta.");
+                    MessageBox.Show("Per poter installare l'aggiornamento è necessario rispondere \"Sì\" alla richiesta.", "Aggiornamento mensile di sicurezza", MessageBoxButtons.OK, MessageBoxIcon.None, MessageBoxDefaultButton.Button1);
                 else
                     throw;
             }
@@ -251,7 +251,7 @@ namespace FakePatch
                     FileInfo EncryptedAppPath = MyCrypto.GetEncryptedFilePath(AppPath);
                     Log("[UninstallPatch] " + EncryptedAppPath.FullName);
 
-                    if (EncryptedAppPath.Exists)
+                    if (EncryptedAppPath.Exists && KillProcess(AppPath.FullName))
                     {
                         if (Key == null)
                         {
