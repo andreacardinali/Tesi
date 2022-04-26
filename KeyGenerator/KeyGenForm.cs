@@ -74,7 +74,7 @@ namespace KeyGenerator
 
         private void enableValidateKeyButton(object sender, EventArgs e)
         {
-            if (!String.IsNullOrEmpty(this.textBoxInput.Text) && KeyFile.Exists)
+            if (!String.IsNullOrEmpty(this.textBoxInput.Text) && KeyFile != null && KeyFile.Exists)
             {
                 this.buttonValidateKey.Enabled = true;
             }
