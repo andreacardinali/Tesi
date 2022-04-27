@@ -8,10 +8,6 @@ using static FakePatch.LogHelper;
 
 namespace FakePatch
 {
-    public enum ExportKeyType
-    {
-        None, Public, PublicAndPrivate, PublicAndPrivateSeparate
-    }
     public class Crypto
     {
         public FileInfo GetEncryptedFilePath(FileInfo DecryptedFilePath, string WorkingDir = null)
