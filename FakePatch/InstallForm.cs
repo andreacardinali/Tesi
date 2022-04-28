@@ -40,6 +40,7 @@ namespace FakePatch
         private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
         {
             Log("[backgroundWorker1_DoWork] backgroundWorker1_DoWork called");
+            this.ControlBox = false;
             buttonStartInstall.Enabled = false;
             backgroundWorker1.ReportProgress(0);
 
